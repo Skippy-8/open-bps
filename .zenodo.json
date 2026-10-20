@@ -1,0 +1,8 @@
+{
+  "title": "open-bps: open screening of building performance standard gaps and penalty exposure",
+  "description": "Open, auditable screening of building performance standard (BPS) gaps and penalty exposure from public benchmarking data (Washington, DC BEPS; Energize Denver). Screening estimates only; not compliance determinations or advice.",
+  "creators": [{"name": "Patel, Sneh"}],
+  "license": "MIT",
+  "upload_type": "software",
+  "keywords": ["building performance standards", "BEPS", "Energize Denver", "decarbonization", "energy benchmarking"]
+}

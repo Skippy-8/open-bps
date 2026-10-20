@@ -1,0 +1,17 @@
+cff-version: 1.2.0
+message: "If you use open-bps or its datasets, please cite it as below, with the data release tag you used."
+title: "open-bps: open screening of building performance standard gaps and penalty exposure"
+type: software
+authors:
+  - family-names: Patel
+    given-names: Sneh
+repository-code: "https://github.com/Skippy-8/open-bps"
+license: MIT
+version: 0.1.0
+date-released: 2026-10-20
+keywords:
+  - building performance standards
+  - BEPS
+  - Energize Denver
+  - building decarbonization
+  - energy benchmarking

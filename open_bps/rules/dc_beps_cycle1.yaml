@@ -1,0 +1,60 @@
+# Washington, DC: Building Energy Performance Standards (BEPS), Compliance Cycle 1.
+# Every rule cites its primary source. Building-level standards and verdicts come from DOEE's open data
+# (layer 75), not from this file.
+jurisdiction: Washington, DC
+program: BEPS
+rule_version: dc_beps_cycle1_guidebook_v1.2
+effective_from: 2021-01-01
+checked_on: 2026-10-20
+
+sources:
+  guidebook_v12:
+    title: BEPS Compliance and Enforcement Guidebook, Compliance Cycle 1, version 1.2 (published 2026-08-11)
+    url: https://dc.beam-portal.org/helpdesk/kb/BEPS_Guidebook/
+    note: plain-language explanation of the CEDC Act 2018 and 20 DCMR Chapter 35 (§§ 3518, 3519.8, 3521.1)
+  guidebook_ch7: {url: https://dc.beam-portal.org/helpdesk/kb/BEPS_Guidebook/129/, section: "Chapter 7, Table 21"}
+  guidebook_ch31: {url: https://dc.beam-portal.org/helpdesk/kb/BEPS_Guidebook/66/, section: "Chapter 3.1 Performance Pathway"}
+  guidebook_ch32: {url: https://dc.beam-portal.org/helpdesk/kb/BEPS_Guidebook/67/, section: "Chapter 3.2 Standard Target Pathway"}
+  timeline: {url: https://dc.beam-portal.org/helpdesk/kb/BEPS_Guidebook/28/, section: "What is the timeline of the BEPS Program?"}
+  disclosure_data:
+    title: DOEE Building Energy Performance Data (DC GIS FeatureServer layer 75)
+    url: https://maps2.dcgis.dc.gov/DCGIS/rest/services/DCGIS_DATA/Environment_Energy_WebMercator/FeatureServer/75
+
+cycle:
+  standards_established: 2021-01-01            # source: timeline
+  compliance_cycle_end: 2026-12-31             # 6-year cycle for BEPS Period 1; source: timeline
+  end_of_cycle_reporting_due: 2027-05-03       # source: timeline
+  next_standards_by: 2029-01-01                # later cycles are 5 years; source: timeline
+
+meets_standard:                                # source: disclosure_data; reproduces DOEE verdicts for 99.5% of buildings (docs/methodology.md)
+  metric_year: 2019                            # 2020 for a few buildings, per the disclosure data
+  rule:
+    ENERGYSTARSCORE: metric >= standard
+    eui_metrics: metric <= standard            # weather-normalized source EUI, source EUI, or a blended custom EUI
+
+pathways:
+  performance:
+    source: guidebook_ch31
+    required_reduction: 0.20                   # site EUI, "greater than 20%"
+    baseline_years: [2018, 2019]               # average of CY2018 and CY2019
+    evaluation_year: 2026
+    metric: >-
+      Adjusted Site EUI (Portfolio Manager models in effect 2021-01-01) for property types that receive an
+      ENERGY STAR score, otherwise Site EUI. DOEE publishes Adjusted Site EUI only on the owner portal, so a
+      public-data estimate uses Site EUI and must be labelled Estimated.
+    payment_adjustment: "max_payment * (1 - min(1, reduction_achieved / 0.20))"   # source: guidebook_ch7 Table 21
+  standard_target:
+    source: guidebook_ch32
+    payment_adjustment: >-
+      max_payment * distance_remaining / distance_of_building_20pct_less_efficient_than_standard
+      (example in Table 21: 6 / 15 = 40%)
+  prescriptive:
+    payment_adjustment: "max_payment * (1 - points_earned / points_needed)"   # Table 21: 15/25 -> reduced by 60%
+  alternative_compliance:
+    payment_adjustment: per the building's ACP agreement with DOEE; no less stringent than other pathways (§ 3519.8)
+
+max_payment:                                   # source: guidebook_ch7
+  per_sq_ft_gfa: 10.00                         # GFA as calculated by Portfolio Manager on the latest compliance report
+  cap_per_building: 7500000
+  campus_cap: 7500000                          # single maximum for College/University and Hospital campuses
+  full_maximum_when: [required information not submitted, knowingly inaccurate information]

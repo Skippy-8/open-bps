@@ -1,0 +1,35 @@
+# Monthly: download fresh public data, score it, and publish it as release assets.
+#   data-latest           always the newest files (the app and README link here)
+#   data-YYYY-MM-DD       a dated archive, including the raw snapshot the scores came from
+# The quality gate in open_bps.dataset stops the run (and publishes nothing) if upstream data changed shape.
+name: refresh-data
+on:
+  schedule:
+    - cron: "0 12 3 * *"
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - run: uv venv --python 3.12 && uv pip install -e .
+      - run: .venv/bin/open-bps fetch all
+      - run: .venv/bin/open-bps score all
+      - name: Package
+        run: |
+          STAMP=$(date -u +%Y-%m-%d)
+          echo "STAMP=$STAMP" >> "$GITHUB_ENV"
+          tar -czf data/raw-snapshot-$STAMP.tar.gz -C data raw
+          ls -la data/scored
+      - name: Publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          NOTES="Scored datasets built by open-bps from public data retrieved $STAMP. Screening estimates only; see DISCLAIMER in the README. DC data: DOEE (CC BY 4.0). Denver data: City and County of Denver, provided as is, not for engineering purposes."
+          gh release create "data-$STAMP" data/scored/* data/raw-snapshot-$STAMP.tar.gz --title "Data $STAMP" --notes "$NOTES" --prerelease
+          gh release view data-latest >/dev/null 2>&1 || gh release create data-latest --title "Data (latest)" --notes "$NOTES" --prerelease
+          gh release upload data-latest data/scored/* --clobber
+          gh release edit data-latest --notes "$NOTES (refreshed $STAMP)"
