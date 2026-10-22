@@ -1,5 +1,7 @@
 # open-bps
 
+[![PyPI](https://img.shields.io/pypi/v/open-bps)](https://pypi.org/project/open-bps/) [![ci](https://github.com/Skippy-8/open-bps/actions/workflows/ci.yml/badge.svg)](https://github.com/Skippy-8/open-bps/actions/workflows/ci.yml)
+
 Open, auditable screening of **building performance standard (BPS)** gaps and penalty exposure, built from
 the benchmarking data cities already publish. It starts with **Washington, DC (BEPS)** and **Denver
 (Energize Denver)**.
@@ -64,7 +66,7 @@ Known limits, also stated in every output:
 Python 3.11 or later.
 
 ```bash
-pip install "open-bps @ git+https://github.com/Skippy-8/open-bps"   # PyPI release: pip install open-bps
+pip install open-bps
 
 open-bps fetch all          # dated raw snapshot of DOEE and Denver open data, with a manifest
 open-bps score all          # data/scored/{dc,denver}.parquet|csv|meta.json and SUMMARY.md
@@ -83,7 +85,7 @@ denver.kbtu_not_achieved(eui=52.0, target_eui=48.3, gfa=150_000)    # 555,000 kB
 dc.performance_payment(gfa=100_000, reduction_achieved=0.10)         # $500,000: half of the $1M maximum
 ```
 
-To run the app: `pip install "open-bps[app] @ git+https://github.com/Skippy-8/open-bps"`, then
+To run the app: `pip install "open-bps[app]"`, then
 `streamlit run app/streamlit_app.py`. Without local data, it reads the latest release.
 
 ## How it is built
