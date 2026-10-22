@@ -3,16 +3,16 @@
 One row per building. `tests/test_docs.py` fails if a column here is missing from the scored tables, or the
 other way round. Units: square feet (sq ft), kBtu, kBtu/sq ft/year, US dollars.
 
-## Both cities
+## Every city
 
 | Column | Meaning |
 |---|---|
-| jurisdiction | `dc` or `denver` |
-| building_id | The city's building identifier (DC: ENERGY STAR Portfolio Manager property ID; Denver: Energize Denver Building ID) |
+| jurisdiction | `dc`, `denver`, `nyc` or `boston` |
+| building_id | The city's building identifier (DC and NYC: ENERGY STAR Portfolio Manager property ID; Denver: Energize Denver Building ID; Boston: BERDO ID) |
 | property_name, address, postal_code | As published by the city |
 | property_type | Primary property type (DC: Portfolio Manager EPA-calculated; Denver: Master Property Type) |
 | gfa | Gross floor area, sq ft (DC: reported GFA, else tax-record floor area; Denver: Master Sq Ft) |
-| year_built | As published |
+| year_built | As published (DC and Denver) |
 | screen_status | `scored`, or why no estimate is given (see below) |
 | rule_version | The rule file the estimates used |
 
@@ -71,3 +71,55 @@ other way round. Units: square feet (sq ft), kBtu, kBtu/sq ft/year, US dollars.
 | original_2025_penalty, original_2027_penalty, original_2030_penalty | kBtu over × $0.15 (three measurement periods); no penalties are levied before late 2029 |
 | extended_cumulative_penalty_through_2035, original_cumulative_penalty_through_2035 | Target-year penalties plus the final-target penalty for each later year through 2035 |
 | no_report_penalty | gfa × $5, for buildings whose latest report is `not submitted` (owed if still missing in a target year) |
+
+## NYC (Local Law 97, from the LL84 disclosure)
+
+Emissions in metric tons CO2e (t); limits in t/year; penalties in dollars a year, with use held at the LL84
+year's values. Each `_2024`, `_2030`, `_2035`, `_2040`, `_2050` column holds for its whole compliance period
+(2024-2029, 2030-2034, 2035-2039, 2040-2049, 2050 on).
+
+`screen_status`: `scored`; `invalid_input` (the row fails the portfolio contract; see `problems`);
+`campus_member` (a building inside a campus whose parent row carries the campus); `unmapped_property_type`
+(a use the rule gives no limit, such as "Other"); `no_emission_factor` (a fuel the rule has no coefficient
+for, such as #5/#6 oil); `implausible_use` (above 100 kgCO2e/sq ft, almost always a reporting error).
+
+| Column | Meaning |
+|---|---|
+| bbl, bin, parent_property_id | As published in LL84 |
+| data_year | The LL84 calendar year |
+| property_uses | Every ESPM use and its floor area, "Type: sq ft; ..." (zero-area uses dropped) |
+| electricity_kwh | Grid electricity, kWh |
+| natural_gas_kbtu, district_steam_kbtu, district_hot_water_kbtu, district_chilled_water_kbtu | kBtu |
+| fuel_oil_1_kbtu, fuel_oil_2_kbtu, fuel_oil_4_kbtu, fuel_oil_5_6_kbtu, diesel_kbtu, propane_kbtu, kerosene_kbtu | kBtu |
+| problems | Why a row is not scored, in words |
+| emissions_t_2024, emissions_t_2030, emissions_t_2035, emissions_t_2040, emissions_t_2050 | Σ fuel use × that period's coefficient |
+| limit_t_2024, limit_t_2030, limit_t_2035, limit_t_2040, limit_t_2050 | Σ use floor area × that period's limit (1 RCNY §103-14) |
+| penalty_2024, penalty_2030, penalty_2035, penalty_2040, penalty_2050 | max(0, emissions − limit) × $268 |
+| limit_per_sqft_2024, emissions_per_sqft_2024 | The 2024 limit and emissions per sq ft of gfa (t/sq ft) |
+| cumulative_penalty_2024_2034 | 6 × penalty_2024 + 5 × penalty_2030 |
+| first_period_over_limit | The first period start year with a penalty |
+| estimated_from | 2035: later figures use DOB's projected electricity and steam coefficients |
+
+## Boston (BERDO 2.0, from the city's disclosure)
+
+`screen_status`: `scored`; `no_data`; `no_floor_area`; `unmapped_property_type`; and, from the city's own
+status, `portfolio_member`, `campus_member`, `vacant`, `state_owned` (their building-level figures would mislead).
+
+| Column | Meaning |
+|---|---|
+| owner_name, tax_parcel_id | As published (BERDO publishes no building names; property_name is the address) |
+| property_uses | The city's "All Property Types and GFAs" text |
+| renewable_electricity_kwh | Renewable electricity the city deducts after the RPS share |
+| building_use | The ordinance's Building Use for the largest property type (P&P Appendix A) |
+| district_steam_factor_t_per_kbtu | The steam factor the city applied (its steam emissions ÷ steam use), used in place of the default |
+| first_compliance_year | 2025, or 2030 for 20,000-35,000 sq ft / 15-34 units |
+| official_ghg_tco2e, official_ghg_intensity_kg, official_standard_kg, official_status, flexibility_measures | The city's published figures, used as the answer key |
+| emissions_t_2025, emissions_t_2030, emissions_t_2035, emissions_t_2040, emissions_t_2050 | Emissions with that year's grid factor and RPS share, use unchanged |
+| standard_kg_per_sqft_2025, standard_kg_per_sqft_2030, standard_kg_per_sqft_2035, standard_kg_per_sqft_2040, standard_kg_per_sqft_2050 | The default standard (largest use), kgCO2e/sq ft |
+| acp_2025, acp_2030, acp_2035, acp_2040, acp_2050 | max(0, emissions − standard × gfa) × $234; blank before the first compliance year |
+| cumulative_acp_2025_2034 | Sum of the yearly ACP, 2025-2034 |
+| first_year_over_standard | The first year with an ACP above zero |
+| emissions_intensity_kg_2025 | 2025 emissions per sq ft, kgCO2e |
+| emissions_matches_official | Our emissions within 0.5% of the city's |
+| standard_matches_official | Our default standard equals the city's (buildings without a flexibility measure) |
+| verdict_matches_official | Our verdict, against the city's applicable standard, equals the city's status |

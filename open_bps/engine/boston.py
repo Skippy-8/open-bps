@@ -100,6 +100,7 @@ def score(df: pd.DataFrame) -> pd.DataFrame:
     ours = out["emissions_intensity_kg_2025"].round(1) <= out["official_standard_kg"]
     out["verdict_matches_official"] = (ours == verdict).where(sc & verdict.notna() & out["official_standard_kg"].notna()
                                                               & out["emissions_t_2025"].notna())
+    out["rule_version"] = p.rule_version
     return out
 
 

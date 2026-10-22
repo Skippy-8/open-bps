@@ -70,4 +70,5 @@ def score(df: pd.DataFrame) -> pd.DataFrame:
         first[out[f"penalty_{y}"] > 0] = y
     out["first_period_over_limit"] = first
     out["estimated_from"] = 2035                    # 2035+ electricity and steam coefficients are DOB projections
+    out["rule_version"] = p.rule_version
     return out
