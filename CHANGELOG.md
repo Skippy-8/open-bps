@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.2.0 (unreleased)
+## 0.2.0 (2026-10-22)
 
 New jurisdictions, your own portfolio, retrofit underwriting. Every 0.1.0 interface and output is unchanged.
 
