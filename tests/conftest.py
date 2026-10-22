@@ -24,12 +24,20 @@ def root(tmp_path_factory) -> Path:
     den.mkdir(parents=True)
     pd.read_parquet(FIX / "denver_master.parquet").to_excel(den / "master.xlsx", index=False)
     write_manifest(den, {"master.xlsx": "fixture"})
+    nyc = root / "raw" / "nyc" / "2026-10-22"
+    nyc.mkdir(parents=True)
+    (nyc / "ll84.csv").write_bytes((FIX / "nyc_ll84.csv").read_bytes())
+    write_manifest(nyc, {"ll84.csv": "fixture"})
+    bos = root / "raw" / "boston" / "2026-10-22"
+    bos.mkdir(parents=True)
+    pd.read_parquet(FIX / "boston_berdo.parquet").to_excel(bos / "berdo.xlsx", sheet_name="Buildings & Campuses", index=False)
+    write_manifest(bos, {"berdo.xlsx": "fixture"})
     return root
 
 
 @pytest.fixture(scope="session")
 def built(root) -> dict:
-    return {c: dataset.build(root, c) for c in ("dc", "denver")}
+    return {c: dataset.build(root, c) for c in ("dc", "denver", "nyc", "boston")}
 
 
 @pytest.fixture(scope="session")
@@ -40,3 +48,13 @@ def dc_scored(root, built) -> pd.DataFrame:
 @pytest.fixture(scope="session")
 def denver_scored(root, built) -> pd.DataFrame:
     return pd.read_parquet(root / "scored" / "denver.parquet")
+
+
+@pytest.fixture(scope="session")
+def nyc_scored(root, built) -> pd.DataFrame:
+    return pd.read_parquet(root / "scored" / "nyc.parquet")
+
+
+@pytest.fixture(scope="session")
+def boston_scored(root, built) -> pd.DataFrame:
+    return pd.read_parquet(root / "scored" / "boston.parquet")

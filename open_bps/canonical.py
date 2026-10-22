@@ -112,3 +112,112 @@ def denver(master: pd.DataFrame, min_gfa: float = 25000) -> pd.DataFrame:
     status[out["compliance_status"].eq("exempt")] = "exempt"
     out["screen_status"] = status
     return out
+
+
+# ---- GHG jurisdictions -----------------------------------------------------------------------------------
+FUEL_COLUMNS = ("electricity_kwh", "natural_gas_kbtu", "district_steam_kbtu", "district_hot_water_kbtu",
+                "district_chilled_water_kbtu", "fuel_oil_1_kbtu", "fuel_oil_2_kbtu", "fuel_oil_4_kbtu",
+                "fuel_oil_5_6_kbtu", "diesel_kbtu", "propane_kbtu", "kerosene_kbtu")
+
+
+def nyc(ll84: pd.DataFrame) -> pd.DataFrame:
+    """LL84 rows (an ESPM export) -> one canonical row per property, validated by the portfolio contract.
+
+    `property_uses` keeps every use and its floor area ("Office: 70000; Retail Store: 30000"); fuels are in
+    kWh (electricity) and kBtu. Invalid rows stay, with screen_status "invalid_input" and the reason.
+    """
+    from open_bps.adapters import espm
+    from open_bps.inputs import validate_rows
+    from open_bps.registry import get_policy
+
+    p = get_policy("nyc_ll97")
+    template = espm.to_template(ll84)
+    valid, errors = validate_rows(template, set(p.property_type_map) | set(p.unassignable_types))
+    err_by_row = {int(e.split()[1]): e.split("): ", 1)[1] for e in errors if e.startswith("Row ")}
+    rec = {n - 2: b for n, b in valid}
+    m = ll84
+    out = pd.DataFrame({
+        "jurisdiction": "nyc",
+        "building_id": m["property_id"].astype("string").str.strip(),
+        "property_name": m["property_name"],
+        "address": m["address_1"],
+        "postal_code": m.get("postal_code"),
+        "bbl": m["nyc_borough_block_and_lot"],
+        "bin": m["nyc_building_identification"],
+        "parent_property_id": m["parent_property_id"],
+        "data_year": _num(m["report_year"]),
+        "property_type": m["largest_property_use_type"],
+        "gfa": _num(template["gross_floor_area"]),
+    })
+    out["property_uses"] = [
+        "; ".join(f"{s.property_type}: {s.gfa:g}" for s in rec[i].spaces) if i in rec else None for i in range(len(m))]
+    for col in FUEL_COLUMNS:
+        out[col] = [rec[i].utilities.by_fuel()[col.rsplit("_", 1)[0]] if i in rec else None for i in range(len(m))]
+    out["problems"] = [err_by_row.get(i + 2) for i in range(len(m))]
+    out = _text(out)
+    status = pd.Series("scored", index=out.index)
+    status[out["problems"].notna()] = "invalid_input"
+    parent = out["parent_property_id"].fillna("")
+    child = ~parent.str.startswith("Not Applicable") & parent.ne("") & parent.ne(out["building_id"])
+    status[child] = "campus_member"           # the campus's parent row carries the whole campus
+    out["screen_status"] = status
+    return out
+
+
+BOSTON_FUELS = {"natural_gas": "Natural Gas", "district_steam": "District Steam",
+                "district_hot_water": "District Hot Water", "district_chilled_water": "District Chilled Water",
+                "fuel_oil_1": "Fuel Oil 1", "fuel_oil_2": "Fuel Oil 2", "fuel_oil_4": "Fuel Oil 4",
+                "fuel_oil_5_6": "Fuel Oil 5 and 6", "propane": "Propane", "diesel": "Diesel", "kerosene": "Kerosene"}
+BOSTON_NOT_SCORED = {      # the city's emissions compliance status -> why a building-level figure would mislead
+    "Emissions Compliance at Portfolio Level": "portfolio_member",
+    "Emissions Compliance at Campus Level": "campus_member",
+    "Campus - Share Water Only": "campus_member",
+    "Vacant": "vacant",
+    "State": "state_owned",
+}
+
+
+def boston(berdo: pd.DataFrame) -> pd.DataFrame:
+    """The BERDO disclosure -> one canonical row per building, keeping the city's own figures for checking.
+
+    District steam: where the city reports both steam use and steam emissions, the factor it applied
+    (usually a system's verified factor, e.g. Vicinity's) is kept as `district_steam_factor_t_per_kbtu`.
+    """
+    from open_bps.registry import get_policy
+
+    p = get_policy("boston_berdo")
+    b = berdo
+    out = pd.DataFrame({
+        "jurisdiction": "boston",
+        "building_id": b["BERDO ID"].astype("string").str.strip(),
+        "property_name": b["Building Address"].fillna(b["Parcel Address"]),     # BERDO publishes no building names
+        "owner_name": b["Parcel Owner Name"],
+        "address": b["Building Address"].fillna(b["Parcel Address"]),
+        "postal_code": b["Building Address Zip Code"],
+        "tax_parcel_id": b["Tax Parcel ID"],
+        "gfa": _num(b["Gross Floor Area (sq ft)"]),
+        "property_type": b["Largest Property Type"],
+        "property_uses": b["All Property Types and GFAs (sq ft)"],
+        "electricity_kwh": _num(b["Electricity Usage (kWh)"]),
+        "renewable_electricity_kwh": _num(b["Renewable Electricity Usage (kWh)"]),
+    })
+    for f, c in BOSTON_FUELS.items():
+        out[f"{f}_kbtu"] = _num(b[f"{c} Usage (kBtu)"])
+    steam_e = _num(b["District Steam Emissions (kgCO2e)"])
+    out["district_steam_factor_t_per_kbtu"] = (steam_e / 1000 / out["district_steam_kbtu"]).where(out["district_steam_kbtu"] > 0)
+    out["building_use"] = out["property_type"].map(lambda t: p.statutory_class(t) if isinstance(t, str) else None)
+    out["first_compliance_year"] = _num(b["First Emissions Compliance Year"])
+    out["official_ghg_tco2e"] = _num(b["Total GHG Emissions (kgCO2e)"]) / 1000
+    out["official_ghg_intensity_kg"] = _num(b["GHG Emissions Intensity (kgCO2e/sq ft)"])
+    out["official_standard_kg"] = _num(b["Applicable Emissions Compliance Standard (kgCO2e/sq ft)"])
+    out["official_status"] = b["Emissions Compliance Status"]
+    out["flexibility_measures"] = b["Flexibility Measures"]
+    out = _text(out)
+    status = pd.Series("scored", index=out.index)
+    status[out["electricity_kwh"].isna() & out["official_ghg_tco2e"].isna()] = "no_data"
+    status[out["building_use"].isna()] = "unmapped_property_type"
+    status[out["gfa"].isna() | out["gfa"].le(0)] = "no_floor_area"
+    for official, s in BOSTON_NOT_SCORED.items():
+        status[out["official_status"].eq(official)] = s
+    out["screen_status"] = status
+    return out

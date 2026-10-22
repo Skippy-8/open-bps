@@ -28,7 +28,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          NOTES="Scored datasets built by open-bps from public data retrieved $STAMP. Screening estimates only; see DISCLAIMER in the README. DC data: DOEE (CC BY 4.0). Denver data: City and County of Denver, provided as is, not for engineering purposes."
+          NOTES="Scored datasets built by open-bps from public data retrieved $STAMP. Screening estimates only; see DISCLAIMER in the README. DC data: DOEE (CC BY 4.0). Denver data: City and County of Denver, provided as is, not for engineering purposes. NYC data: City of New York, LL84 disclosure (NYC Open Data). Boston data: City of Boston, BERDO disclosure (ODC PDDL)."
           gh release create "data-$STAMP" data/scored/* data/raw-snapshot-$STAMP.tar.gz --title "Data $STAMP" --notes "$NOTES" --prerelease
           gh release view data-latest >/dev/null 2>&1 || gh release create data-latest --title "Data (latest)" --notes "$NOTES" --prerelease
           gh release upload data-latest data/scored/* --clobber

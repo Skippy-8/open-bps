@@ -186,3 +186,150 @@ def dc_workbook(row: dict, out: Path) -> Path:
     wb.save(out)
     return out
 
+
+
+# ---- GHG jurisdictions (NYC LL97, Boston BERDO) -------------------------------------------------------------
+def _col(i: int) -> str:
+    s = ""
+    while i:
+        i, r = divmod(i - 1, 26)
+        s = chr(65 + r) + s
+    return s
+
+
+def building_workbook(jurisdiction: str, building, out: Path, first: int, last: int, blend_standard: bool = False,
+                      overrides: dict | None = None, data_note: str = "your data") -> Path:
+    """A GHG building's exposure year by year, every figure a formula over named inputs.
+
+    Spaces: each space's sq ft times its class's limit per compliance period, summed into the building limit.
+    Exposure: per year, fuel use times that year's factors (electricity after the zero-emission share and any
+    renewable kWh), the limit for the year's period, the excess and the penalty. Checks: the engine's figures.
+    Years run from `first` to `last`, stopping before any year the policy cannot price (e.g. no factor yet).
+    """
+    from open_bps.engine import blend, ghg
+    from open_bps.policy import FACTOR_UNITS
+    from open_bps.registry import get_policy
+
+    p = get_policy(jurisdiction)
+    use = {f: v for f, v in building.utilities.by_fuel().items() if v}
+    results = []
+    for y in range(first, last + 1):
+        r = ghg.assess(p, building, y, blend_standard=blend_standard, overrides=overrides)
+        if r.problems:
+            if not results:
+                raise ValueError(f"cannot price {y}: " + "; ".join(r.problems))
+            break
+        results.append(r)
+    years = [r.year for r in results]
+    periods = [q for q in p.compliance_periods if any(q.covers(y) for y in years)]
+
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Building"
+    start = _head(ws, f"{p.program} exposure: {building.name or building.building_id} (ID {building.building_id})", data_note)
+    src = lambda key: p.sources[key].title or key  # noqa: E731
+    items = [("GFA", "Gross floor area (sq ft)", building.gross_floor_area, "#,##0", data_note),
+             ("Rate", "Penalty per tCO2e over the limit ($)", ghg.penalty_rate(p), "$#,##0",
+              f"{src(p.penalty.source)}; {p.penalty.section or ''}"),
+             ("Renew", "Renewable electricity deducted (kWh)", building.utilities.renewable_electricity_kwh
+              if p.electricity and p.electricity.subtract_renewable_kwh else 0, "#,##0",
+              data_note if p.electricity and p.electricity.subtract_renewable_kwh else f"{p.id} has no such deduction")]
+    for f, v in use.items():
+        items.append((f"Use_{f}", f"{f.replace('_', ' ').capitalize()} ({'kWh' if f == 'electricity' else 'kBtu'} a year), held flat",
+                      v, "#,##0", data_note))
+    _inputs(wb, ws, start, items)
+
+    # Spaces: limits by period for the class each space is counted at
+    sp = wb.create_sheet("Spaces")
+    lim0 = blend.limit(p, list(building.spaces), years[0], blend=blend_standard)
+    head = ["Property type", "Law's class", "Counted at", "Sq ft"] + [f"Limit {q.id} (t/sf)" for q in periods] \
+        + [f"Contribution {q.id} (t)" for q in periods]
+    for j, h in enumerate(head, start=1):
+        sp.cell(1, j, h).font = BOLD
+    n = len(lim0.spaces)
+    for i, s in enumerate(lim0.spaces, start=2):
+        sp.cell(i, 1, s.property_type)
+        sp.cell(i, 2, s.statutory_class)
+        sp.cell(i, 3, s.applied_class)
+        c = sp.cell(i, 4, s.gfa)
+        c.font, c.number_format = BLUE, "#,##0"
+        for k, q in enumerate(periods):
+            c = sp.cell(i, 5 + k, p.threshold(s.applied_class, q.start_year))
+            c.font, c.number_format = BLUE, "0.000000000"
+            lc = _col(5 + k)
+            sp.cell(i, 5 + len(periods) + k, f"=D{i}*{lc}{i}").number_format = "#,##0.00"
+    tot = n + 3
+    sp.cell(tot, 1, "Building limit (tCO2e a year)").font = BOLD
+    for k in range(len(periods)):
+        cc = _col(5 + len(periods) + k)
+        sp.cell(tot, 5 + len(periods) + k, f"=SUM({cc}2:{cc}{n + 1})").number_format = "#,##0.00"
+        _name(wb, f"Limit_P{k + 1}", "Spaces", f"{cc}{tot}")
+    th = p.thresholds
+    sp.cell(tot + 2, 1, f"Limits: {src(th.source)}, {th.section or ''} (converted from {th.unit} to t/sf)").font = GREY
+    sp.cell(tot + 3, 1, f"Method: {lim0.method}. " + " ".join(lim0.notes)).font = GREY
+    sp.column_dimensions["A"].width = 44
+
+    # Exposure: one row per year
+    ex = wb.create_sheet("Exposure")
+    fuels = list(use)
+    head = ["Year", "Period", "Zero-emission share of grid kWh"] + [f"Factor: {f} (t per {'kWh' if f == 'electricity' else 'kBtu'})" for f in fuels] \
+        + ["Electricity counted (kWh)", "Emissions (tCO2e)", "Limit (tCO2e)", "Excess (tCO2e)", "Penalty ($)", "Estimated"]
+    for j, h in enumerate(head, start=1):
+        ex.cell(1, j, h).font = BOLD
+    fc = {f: _col(4 + j) for j, f in enumerate(fuels)}
+    c_cnt, c_em, c_lim, c_exc, c_pen = (_col(4 + len(fuels) + k) for k in range(5))
+    for i, r in enumerate(results, start=2):
+        y = r.year
+        ex.cell(i, 1, y)
+        ex.cell(i, 2, r.period)
+        c = ex.cell(i, 3, p.rps_share(y))
+        c.font, c.number_format = BLUE, "0%"
+        terms = []
+        for f in fuels:
+            fac = (overrides or {}).get(f)
+            if fac is None:
+                fac = p.factor(f, y)[0]
+            c = ex.cell(i, 4 + fuels.index(f), fac)
+            c.font, c.number_format = BLUE, "0.000000000"
+            terms.append(f"{c_cnt}{i}*{fc[f]}{i}" if f == "electricity" else f"Use_{f}*{fc[f]}{i}")
+        ex.cell(i, 4 + len(fuels), "=MAX(0,Use_electricity*(1-C{0})-Renew)".format(i) if "electricity" in use else 0)
+        ex.cell(i, 5 + len(fuels), "=" + ("+".join(terms) or "0")).number_format = "#,##0.00"
+        k = next(j for j, q in enumerate(periods) if q.covers(y))
+        ex.cell(i, 6 + len(fuels), f"=Limit_P{k + 1}").number_format = "#,##0.00"
+        ex.cell(i, 7 + len(fuels), f"=MAX(0,{c_em}{i}-{c_lim}{i})").number_format = "#,##0.00"
+        ex.cell(i, 8 + len(fuels), f"={c_exc}{i}*Rate").number_format = "$#,##0"
+        ex.cell(i, 9 + len(fuels), "Estimated" if r.estimated else "")
+    last_row = len(results) + 1
+    ex.cell(last_row + 2, 1, f"Cumulative penalty {years[0]}-{years[-1]}").font = BOLD
+    ex.cell(last_row + 2, 8 + len(fuels), f"=SUM({c_pen}2:{c_pen}{last_row})").number_format = "$#,##0"
+    _name(wb, "Cum_Penalty", "Exposure", f"{c_pen}{last_row + 2}")
+    notes = [f"{f}: {src(p.emission_factors[f].source)}, {p.emission_factors[f].section or ''} "
+             f"(converted from {p.emission_factors[f].unit}; {FACTOR_UNITS[p.emission_factors[f].unit][0]} basis)"
+             for f in fuels if f in p.emission_factors and f not in (overrides or {})]
+    notes += [f"{f}: factor supplied by the user" for f in (overrides or {}) if f in use]
+    if p.electricity:
+        notes.append(f"Zero-emission share: {src(p.electricity.source)}, {p.electricity.section or ''}")
+    notes.append("Use is held at the latest values ('cost of inaction'). 'Estimated' rows use factors from guidance, not law.")
+    for j, t in enumerate(notes):
+        ex.cell(last_row + 4 + j, 1, t).font = GREY
+    ex.column_dimensions["A"].width = 10
+
+    pick = sorted({0, len(results) // 2, len(results) - 1})
+    checks = [(f"Limit {results[0].year} (t)", f"=Exposure!{c_lim}2", results[0].limit_t)]
+    for j in pick:
+        r = results[j]
+        checks.append((f"Emissions {r.year} (t)", f"=Exposure!{c_em}{j + 2}", r.emissions_t))
+        checks.append((f"Penalty {r.year} ($)", f"=Exposure!{c_pen}{j + 2}", r.penalty))
+    checks.append((f"Cumulative penalty {years[0]}-{years[-1]} ($)", "=Cum_Penalty", sum(r.penalty for r in results)))
+    _checks(wb, checks)
+    ws_s = wb.create_sheet("Sources")
+    ws_s["A1"], ws_s["A1"].font = f"Rules: {p.rule_version} (checked {p.checked_on})", BOLD
+    for i, (key, s) in enumerate(p.sources.items(), start=3):
+        ws_s.cell(i, 1, key)
+        ws_s.cell(i, 2, s.title or s.section or "")
+        ws_s.cell(i, 3, s.url)
+    ws_s.column_dimensions["B"].width = 70
+    out = Path(out)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    wb.save(out)
+    return out

@@ -1,11 +1,11 @@
 """Command line.
 
-  open-bps fetch  {dc,denver,all}        download a dated raw snapshot (with manifest) into <root>/raw/
-  open-bps score  {dc,denver,all}        build <root>/scored/<city>.parquet|csv|meta.json from the latest snapshot
-  open-bps lookup {dc,denver} TEXT       find buildings by id, name or address in the scored data
-  open-bps excel  {dc,denver} ID         write a one-building workbook (live formulas, Checks tab)
-  open-bps validate                      how well the DC rule reproduces DOEE's published verdicts
-  open-bps rules                         rule versions and their primary sources
+  open-bps fetch  {dc,denver,nyc,boston,all}   download a dated raw snapshot (with manifest) into <root>/raw/
+  open-bps score  {dc,denver,nyc,boston,all}   build <root>/scored/<city>.parquet|csv|meta.json from the latest snapshot
+  open-bps lookup CITY TEXT                    find buildings by id, name or address in the scored data
+  open-bps excel  CITY ID                      write a one-building workbook (live formulas, Checks tab)
+  open-bps validate                            how well the rules reproduce DOEE's and Boston's published verdicts
+  open-bps rules                               rule versions and their primary sources
 
 Every number is a screening estimate; see DISCLAIMER.
 """
@@ -17,12 +17,22 @@ from pathlib import Path
 
 import pandas as pd
 
-from open_bps import DISCLAIMER, dataset, excel
-from open_bps import rules as _rules
+from open_bps import DISCLAIMER, dataset, excel, registry
+from open_bps.engine import boston as boston_engine
+from open_bps.engine import nyc as nyc_engine
+from open_bps.sources import boston as boston_src
 from open_bps.sources import dc as dc_src
 from open_bps.sources import denver as denver_src
+from open_bps.sources import nyc as nyc_src
 
-CITIES = ("dc", "denver")
+CITIES = ("dc", "denver", "nyc", "boston")
+SOURCES = {"dc": dc_src, "denver": denver_src, "nyc": nyc_src, "boston": boston_src}
+LOOKUP_COLUMNS = {
+    "denver": ["eui", "target_final", "extended_2028_penalty", "extended_2032_penalty"],
+    "dc": ["metric_type", "standard", "metric", "official_meets_beps", "pathway", "payment_est_performance"],
+    "nyc": ["emissions_t_2024", "limit_t_2024", "penalty_2024", "penalty_2030"],
+    "boston": ["emissions_t_2025", "standard_kg_per_sqft_2025", "official_status", "acp_2025", "acp_2030"],
+}
 
 
 def _cities(which: str) -> tuple[str, ...]:
@@ -38,7 +48,7 @@ def _scored(root: Path, city: str) -> pd.DataFrame:
 
 def cmd_fetch(a) -> None:
     for c in _cities(a.city):
-        folder = (dc_src if c == "dc" else denver_src).fetch(a.root)
+        folder = SOURCES[c].fetch(a.root)
         print(f"{c}: {folder}")
 
 
@@ -46,9 +56,12 @@ def cmd_score(a) -> None:
     for c in _cities(a.city):
         meta = dataset.build(a.root, c)
         print(f"{c}: {meta['rows']} buildings, {meta['screen_status_counts']} (rules {meta['rule_version']})")
-        if "validation" in meta:
-            v = meta["validation"]
+        v = meta.get("validation")
+        if isinstance(v, dict) and "verdicts_matching" in v:
             print(f"  verdicts matching DOEE: {v['verdicts_matching']}/{v['verdicts_compared']}")
+        elif isinstance(v, dict):
+            print(f"  verdicts matching the city: {v['verdict_matching']}/{v['verdict_compared']}; "
+                  f"emissions {v['emissions_matching']}/{v['emissions_compared']}")
     print(f"summary: {dataset.summary(a.root)}")
     print(DISCLAIMER)
 
@@ -59,9 +72,7 @@ def cmd_lookup(a) -> None:
     hit = df[df["building_id"].str.lower().eq(q)
              | df["property_name"].fillna("").str.lower().str.contains(q, regex=False)
              | df["address"].fillna("").str.lower().str.contains(q, regex=False)]
-    cols = (["building_id", "property_name", "address", "property_type", "gfa", "screen_status"]
-            + (["eui", "target_final", "extended_2028_penalty", "extended_2032_penalty"] if a.city == "denver"
-               else ["metric_type", "standard", "metric", "official_meets_beps", "pathway", "payment_est_performance"]))
+    cols = ["building_id", "property_name", "address", "property_type", "gfa", "screen_status"] + LOOKUP_COLUMNS[a.city]
     with pd.option_context("display.width", 200, "display.max_columns", 20, "display.max_colwidth", 40):
         print(hit[cols].head(a.limit).to_string(index=False) if len(hit) else "no match")
     print(DISCLAIMER)
@@ -76,22 +87,34 @@ def cmd_excel(a) -> None:
     if r["screen_status"] != "scored":
         raise SystemExit(f"building {a.building_id} is not scored ({r['screen_status']})")
     out = Path(a.out or f"{a.city}_{a.building_id}.xlsx")
-    print((excel.denver_workbook if a.city == "denver" else excel.dc_workbook)(r, out))
+    if a.city == "nyc":
+        print(excel.building_workbook("nyc_ll97", nyc_engine.record(r), out, 2024, 2050, data_note=nyc_src.ATTRIBUTION))
+    elif a.city == "boston":
+        start = int(r["first_compliance_year"]) if r["first_compliance_year"] == r["first_compliance_year"] else 2025
+        print(excel.building_workbook("boston_berdo", boston_engine.record(r), out, start, 2050,
+                                      overrides=boston_engine.overrides(r), data_note=boston_src.ATTRIBUTION))
+    else:
+        print((excel.denver_workbook if a.city == "denver" else excel.dc_workbook)(r, out))
 
 
 def cmd_validate(a) -> None:
-    meta = Path(a.root) / "scored" / "dc.meta.json"
-    if not meta.exists():
-        raise SystemExit("run `open-bps score dc` first")
-    print(json.dumps(json.loads(meta.read_text())["validation"], indent=1))
+    found = False
+    for city in ("dc", "boston"):
+        meta = Path(a.root) / "scored" / f"{city}.meta.json"
+        if meta.exists():
+            found = True
+            print(f"{city}: " + json.dumps(json.loads(meta.read_text())["validation"], indent=1))
+    if not found:
+        raise SystemExit("run `open-bps score dc` (or boston) first")
 
 
 def cmd_rules(a) -> None:
-    for c in CITIES:
-        r = _rules.load(c)
-        print(f"{c}: {r['program']} | {r['rule_version']} | checked {r['checked_on']}")
-        for k, s in r["sources"].items():
-            print(f"   {k}: {s['url']}")
+    names = {v: k for k, v in registry.ALIASES.items()}
+    for j in registry.list_jurisdictions():
+        p = registry.get_policy(j)
+        print(f"{names.get(j, j)}: {p.program} | {p.rule_version} | checked {p.checked_on}")
+        for k, s in p.sources.items():
+            print(f"   {k}: {s.url}")
 
 
 def main(argv: list[str] | None = None) -> None:
@@ -114,7 +137,7 @@ def main(argv: list[str] | None = None) -> None:
     x.add_argument("building_id")
     x.add_argument("--out")
     x.set_defaults(fn=cmd_excel)
-    sub.add_parser("validate", help="DC rule vs DOEE's published verdicts").set_defaults(fn=cmd_validate)
+    sub.add_parser("validate", help="the rules vs DOEE's and Boston's published verdicts").set_defaults(fn=cmd_validate)
     sub.add_parser("rules", help="rule versions and sources").set_defaults(fn=cmd_rules)
     a = p.parse_args(argv)
     a.fn(a)

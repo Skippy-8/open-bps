@@ -108,45 +108,50 @@ class PortfolioInput(BaseModel):
 
     @classmethod
     def from_dataframe(cls, df: pd.DataFrame, allowed_property_types=None) -> PortfolioInput:
-        """Validate every row. `allowed_property_types` (e.g. a policy's mapped ESPM types) makes an unknown
-        type an error that lists the allowed values."""
-        allowed = sorted(allowed_property_types) if allowed_property_types is not None else None
-        errors, buildings, seen = [], [], {}
-        unknown_cols = [c for c in df.columns if c not in _KNOWN and not _SPACE_COL.match(str(c))]
-        if unknown_cols:
-            errors.append(f"Header: unknown column(s) {unknown_cols}; expected building_id, name, gross_floor_area, "
-                          f"property_type_N, gfa_N and {list(UTILITY_COLUMNS)}")
-        for i, row in enumerate(df.to_dict("records")):
-            rownum = i + 2
-            label = _label(row)
-            problems: list[str] = []
-            data = _row_to_record(row, problems)
-            if allowed is not None:
-                for s in data.get("spaces", []):
-                    t = s.get("property_type")
-                    if t and t not in allowed:
-                        problems.append(f"property type {t!r} is not one this jurisdiction maps; allowed: {allowed}")
-            bid = data.get("building_id")
-            if bid:
-                if bid in seen:
-                    problems.append(f"building_id {bid!r} repeats row {seen[bid]}")
-                seen.setdefault(bid, rownum)
-            try:
-                record = BuildingRecord.model_validate(data)
-            except ValidationError as e:
-                unreadable = {m.split("'")[1] for m in problems if " is not a number " in m}
-                problems += [m for m in (_message(err) for err in e.errors())
-                             if m not in problems and not (m.startswith("missing '") and m.split("'")[1] in unreadable)]
-            else:
-                if not problems:
-                    buildings.append(record)
-            if problems:
-                errors.append(f"Row {rownum} ({label}): " + "; ".join(problems))
-        if not len(df):
-            errors.append("the file has no buildings")
+        """Validate every row; raise one PortfolioValidationError listing every problem. `allowed_property_types`
+        (e.g. the ESPM types a policy knows) makes an unknown type an error that lists the allowed values."""
+        buildings, errors = validate_rows(df, allowed_property_types)
         if errors:
             raise PortfolioValidationError(errors)
-        return cls(buildings=buildings)
+        return cls(buildings=[b for _, b in buildings])
+
+
+def validate_rows(df: pd.DataFrame, allowed_property_types=None) -> tuple[list[tuple[int, BuildingRecord]], list[str]]:
+    """The lenient form: (spreadsheet row number, record) for every valid row, and the errors for the rest."""
+    allowed = sorted(allowed_property_types) if allowed_property_types is not None else None
+    errors, buildings, seen = [], [], {}
+    unknown_cols = [c for c in df.columns if c not in _KNOWN and not _SPACE_COL.match(str(c))]
+    if unknown_cols:
+        errors.append(f"Header: unknown column(s) {unknown_cols}; expected building_id, name, gross_floor_area, "
+                      f"property_type_N, gfa_N and {list(UTILITY_COLUMNS)}")
+    for i, row in enumerate(df.to_dict("records")):
+        rownum = i + 2
+        problems: list[str] = []
+        data = _row_to_record(row, problems)
+        if allowed is not None:
+            for s in data.get("spaces", []):
+                t = s.get("property_type")
+                if t and t not in allowed:
+                    problems.append(f"property type {t!r} is not one this jurisdiction maps; allowed: {allowed}")
+        bid = data.get("building_id")
+        if bid:
+            if bid in seen:
+                problems.append(f"building_id {bid!r} repeats row {seen[bid]}")
+            seen.setdefault(bid, rownum)
+        try:
+            record = BuildingRecord.model_validate(data)
+        except ValidationError as e:
+            unreadable = {m.split("'")[1] for m in problems if " is not a number " in m}
+            problems += [m for m in (_message(err) for err in e.errors())
+                         if m not in problems and not (m.startswith("missing '") and m.split("'")[1] in unreadable)]
+        else:
+            if not problems:
+                buildings.append((rownum, record))
+        if problems:
+            errors.append(f"Row {rownum} ({_label(row)}): " + "; ".join(problems))
+    if not len(df):
+        errors.append("the file has no buildings")
+    return buildings, errors
 
 
 _KNOWN = {"building_id", "name", "gross_floor_area", *UTILITY_COLUMNS}
