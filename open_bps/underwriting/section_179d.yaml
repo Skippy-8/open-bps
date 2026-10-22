@@ -1,0 +1,21 @@
+# IRC §179D energy efficient commercial buildings deduction: per-square-foot amounts by the tax year the property
+# is placed in service, and the One Big Beautiful Bill Act termination. Checked 2026-10-22.
+sources:
+  i7205_2024:
+    title: Instructions for Form 7205 (Rev. December 2024), worksheet for line 1, column (f)
+    url: https://www.irs.gov/pub/irs-prior/i7205--2024.pdf
+  i7205_2025:
+    title: Instructions for Form 7205 (Rev. December 2025), What's New and worksheet for line 1, column (f)
+    url: https://www.irs.gov/pub/irs-prior/i7205--2025.pdf
+  rp_2025_32:
+    title: Rev. Proc. 2025-32, §4.25 (2026 amounts) and §2.11 (OBBBA §70507 termination)
+    url: https://www.irs.gov/pub/irs-drop/rp-25-32.pdf
+termination:
+  construction_begins_after: 2026-06-30      # P.L. 119-21 §70507; rp_2025_32 §2.11; i7205_2025 What's New
+  source: rp_2025_32
+min_savings: 0.25                            # below 25% there is no deduction (i7205 worksheet line 2a)
+rates:                                       # $/sq ft: base at 25% savings, + per percentage point above 25%, cap
+  2024: {base: 0.57, per_point: 0.02, cap: 1.13, pwa_base: 2.83, pwa_per_point: 0.11, pwa_cap: 5.65, source: i7205_2024}
+  2025: {base: 0.58, per_point: 0.02, cap: 1.16, pwa_base: 2.90, pwa_per_point: 0.12, pwa_cap: 5.81, source: i7205_2025}
+  2026: {base: 0.59, per_point: 0.02, cap: 1.19, pwa_base: 2.97, pwa_per_point: 0.12, pwa_cap: 5.94, source: rp_2025_32}
+# Later tax years: the IRS has not yet published amounts; the latest year's are used and labelled as such.
