@@ -7,8 +7,8 @@ authors:
     given-names: Sneh
 repository-code: "https://github.com/Skippy-8/open-bps"
 license: MIT
-version: 0.1.0
-date-released: 2026-10-20
+version: 0.2.0
+date-released: 2026-10-22
 keywords:
   - building performance standards
   - BEPS

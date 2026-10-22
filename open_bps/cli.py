@@ -6,6 +6,7 @@
   open-bps excel  CITY ID                      write a one-building workbook (live formulas, Checks tab)
   open-bps validate                            how well the rules reproduce DOEE's and Boston's published verdicts
   open-bps rules                               rule versions and their primary sources
+  open-bps analyze FILE --jurisdiction J       your own buildings: exposure, optional retrofit underwriting, workbook
 
 Every number is a screening estimate; see DISCLAIMER.
 """
@@ -117,6 +118,42 @@ def cmd_rules(a) -> None:
             print(f"   {k}: {s.url}")
 
 
+def cmd_analyze(a) -> None:
+    from datetime import date
+
+    from open_bps.analyzer import PortfolioAnalyzer
+    from open_bps.inputs import PortfolioValidationError
+    from open_bps.underwriting.capital_stack import Financing
+
+    try:
+        pa = PortfolioAnalyzer(a.jurisdiction, blend_standard=a.blend)
+        portfolio = pa.load(a.file, espm=a.espm)
+    except (PortfolioValidationError, ValueError) as e:
+        print(e)
+        raise SystemExit(2) from None
+    exposure = pa.analyze(portfolio, last=a.last_year, hold_years=a.hold)
+    cols = ["building_id", "name", "gross_floor_area", "first_year_over_limit", f"cumulative_penalty_{a.hold}y", "status"]
+    with pd.option_context("display.width", 200, "display.max_columns", 20, "display.max_colwidth", 40):
+        print(exposure[cols].to_string(index=False))
+    if a.eui_reduction is not None:
+        if a.capex_per_sqft is None:
+            raise SystemExit("--eui-reduction needs --capex-per-sqft")
+        fin = {"cpace": lambda: Financing.cpace(a.rate, a.term, a.share),
+               "debt": lambda: Financing.debt(a.share, a.rate, a.term), "cash": Financing.cash}[a.financing]()
+        deals = pa.underwrite(portfolio, a.eui_reduction, fin, capex_per_sqft=a.capex_per_sqft, start_year=a.start_year,
+                              hold_years=a.hold, discount_rate=a.discount, energy_cost_savings_per_sqft=a.savings_per_sqft,
+                              grid=a.grid, grid_decline=a.grid_decline,
+                              construction_start=date.fromisoformat(a.construction_start) if a.construction_start else None,
+                              pwa=a.pwa)
+        cols = ["building_id", "capex", "avoided_penalty_hold", "incentive_179d", "npv_unlevered", "irr_unlevered",
+                "payback_year", "status"]
+        with pd.option_context("display.width", 200, "display.max_columns", 20):
+            print(deals[[c for c in cols if c in deals]].to_string(index=False))
+    if a.output:
+        print(pa.to_excel(a.output))
+    print(DISCLAIMER)
+
+
 def main(argv: list[str] | None = None) -> None:
     p = argparse.ArgumentParser(prog="open-bps", description=__doc__.split("\n")[0])
     p.add_argument("--root", type=Path, default=Path("data"), help="data folder (default ./data)")
@@ -139,6 +176,28 @@ def main(argv: list[str] | None = None) -> None:
     x.set_defaults(fn=cmd_excel)
     sub.add_parser("validate", help="the rules vs DOEE's and Boston's published verdicts").set_defaults(fn=cmd_validate)
     sub.add_parser("rules", help="rule versions and sources").set_defaults(fn=cmd_rules)
+    an = sub.add_parser("analyze", help="your own buildings: exposure, retrofit underwriting, audited workbook")
+    an.add_argument("file", help="portfolio CSV (see open_bps.inputs) or an ESPM export with --espm")
+    an.add_argument("--jurisdiction", required=True, help="nyc_ll97 or boston_berdo (aliases nyc, boston)")
+    an.add_argument("--espm", action="store_true", help="the file is an ENERGY STAR Portfolio Manager export")
+    an.add_argument("--blend", action="store_true", help="use the opt-in blended standard (Boston)")
+    an.add_argument("--last-year", type=int, default=2050)
+    an.add_argument("--hold", type=int, default=10, help="hold period in years (default 10)")
+    an.add_argument("--eui-reduction", type=float, help="retrofit: cut in every fuel's use, e.g. 0.3")
+    an.add_argument("--capex-per-sqft", type=float, help="retrofit capex per sq ft ($)")
+    an.add_argument("--financing", choices=["cpace", "debt", "cash"], default="cpace")
+    an.add_argument("--rate", type=float, default=0.07, help="financing rate (assumption; default 7%%)")
+    an.add_argument("--term", type=int, default=20, help="financing term in years (default 20)")
+    an.add_argument("--share", type=float, default=1.0, help="share financed: C-PACE share or debt loan-to-cost")
+    an.add_argument("--discount", type=float, default=0.08, help="discount rate (default 8%%)")
+    an.add_argument("--savings-per-sqft", type=float, default=0.0, help="energy cost savings, $ per sq ft a year")
+    an.add_argument("--start-year", type=int, help="first year of the hold (default: this year)")
+    an.add_argument("--grid", choices=["static_statutory", "dynamic_grid_projection"], default="static_statutory")
+    an.add_argument("--grid-decline", type=float, default=0.0, help="annual decline for the grid scenario")
+    an.add_argument("--construction-start", help="retrofit construction start (YYYY-MM-DD), for section 179D")
+    an.add_argument("--pwa", action="store_true", help="prevailing wage and apprenticeship requirements met (179D)")
+    an.add_argument("--output", help="write the audited workbook here (.xlsx)")
+    an.set_defaults(fn=cmd_analyze)
     a = p.parse_args(argv)
     a.fn(a)
 

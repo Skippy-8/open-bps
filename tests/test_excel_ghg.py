@@ -19,7 +19,7 @@ def _assert_checks_pass(path):
     sol = _solve(path)
     results = [v for (s, a), v in sol.items() if s == "CHECKS" and a.startswith("D") and a != "D1"]
     assert len(results) >= 6 and set(results) == {"PASS"}, results
-    assert openpyxl.load_workbook(path)["Building"]["A1"].value == DISCLAIMER
+    assert openpyxl.load_workbook(path).worksheets[0]["A1"].value == DISCLAIMER
 
 
 def _typed_numbers(path):

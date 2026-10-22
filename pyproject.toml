@@ -1,12 +1,12 @@
 [project]
 name = "open-bps"
-version = "0.1.0"
-description = "Open, auditable screening of building performance standard (BPS) gaps and penalty exposure from public benchmarking data. Washington, DC (BEPS) and Denver (Energize Denver) first."
+version = "0.2.0"
+description = "Open, auditable building performance standard (BPS) screening and retrofit underwriting: DC BEPS, Energize Denver, NYC Local Law 97 and Boston BERDO, from public data or your own portfolio."
 readme = "README.md"
 requires-python = ">=3.11"
 license = { text = "MIT" }
 authors = [{ name = "Sneh Patel" }]
-keywords = ["building performance standards", "BEPS", "Energize Denver", "decarbonization", "energy benchmarking", "real estate"]
+keywords = ["building performance standards", "BEPS", "Energize Denver", "Local Law 97", "BERDO", "decarbonization", "energy benchmarking", "real estate", "C-PACE", "179D"]
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
@@ -24,9 +24,11 @@ dependencies = [
 [project.optional-dependencies]
 app = ["streamlit>=1.45"]
 dev = ["pytest>=8", "ruff>=0.5", "formulas>=1.2"]
+mcp = ["fastmcp>=2"]
 
 [project.scripts]
 open-bps = "open_bps.cli:main"
+open-bps-mcp = "open_bps.mcp_server:main"
 
 [project.urls]
 Homepage = "https://github.com/Skippy-8/open-bps"
