@@ -1,6 +1,6 @@
 # Methodology
 
-Every rate, year and formula comes from the rule files in `open_bps/rules/`. Each rule file cites the
+Every rate, year and formula comes from the rule files in `open_bps/jurisdictions/`. Each rule file cites the
 regulator's own document and records the date it was checked. When a city changes its rules, a new rule
 file version is added; outputs carry the `rule_version` they used.
 

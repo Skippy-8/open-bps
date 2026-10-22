@@ -1,0 +1,245 @@
+# Boston: Building Emissions Reduction and Disclosure Ordinance (BERDO 2.0), City of Boston Code §7-2.2, with the
+# 2026 BERDO Regulations and the Policies and Procedures (v5, adopted 2026-09-14). Every number cites its source.
+id: boston_berdo
+jurisdiction: Boston, MA
+program: BERDO 2.0 (building emissions standards)
+rule_version: boston_berdo_2.0_pp_v5_2026-09
+effective_from: 2025-01-01
+checked_on: 2026-10-22
+
+sources:
+  ordinance:
+    title: City of Boston Code §7-2.2, BERDO 2.0 (Docket 0775, as amended)
+    url: https://www.boston.gov/sites/default/files/file/2023/12/BERDO%202.0%20Final%20Amended%20Docket%200775_1.pdf
+    section: "§7-2.2(i) Table 1; compliance mechanisms (d) ACP; enforcement (ii) fines"
+    checked_on: 2026-10-22
+  regulations:
+    title: BERDO Regulations (2026)
+    url: https://www.boston.gov/sites/default/files/file/2026/05/2026%20Draft%20Regulations%20Final_2.pdf
+    section: "§VIII Emissions Factors; §IX Emissions Standards"
+    note: the boston.gov link labelled 'Clean Versions of Adopted Regulations' serves a byte-identical file
+    checked_on: 2026-10-22
+  policies_procedures:
+    title: BERDO Policies and Procedures, version 5 (adopted 2026-09-14)
+    url: https://www.boston.gov/sites/default/files/file/2026/09/BERDO%20Policies%20and%20Procedures_0.pdf
+    section: "§5 emissions; §6 blended standard; Appendix A building uses; Appendix B projected grid factors"
+    checked_on: 2026-10-22
+  factor_list:
+    title: BERDO Emissions Factors List (factors for calculating emissions from 2023; updated June 2024)
+    url: https://www.boston.gov/sites/default/files/file/2024/06/BERDO%20Emissions%20Factors%20List_1.pdf
+    archived: http://web.archive.org/web/20240718082749/https://www.boston.gov/sites/default/files/file/2024/06/BERDO%20Emissions%20Factors%20List_1.pdf
+    note: >-
+      Removed from boston.gov (404). These are the fuel factors the city applied in its 2026 disclosure of 2025 data
+      (natural gas 53.11 on 99.9% of rows; #2 oil 74.21 on 100%).
+    checked_on: 2026-10-22
+  flexibility_guide:
+    title: BERDO Flexibility Measures guide
+    url: https://www.boston.gov/sites/default/files/berdo/BERDO_FlexibilityMeasures.pdf
+    section: "Blended Emissions Standard: 'As a default, buildings are required to comply with the emissions standard that matches its largest primary use type'"
+    checked_on: 2026-10-22
+  mgl_rps:
+    title: M.G.L. c.25A §11F(a), Massachusetts RPS Class I schedule
+    url: https://malegislature.gov/Laws/GeneralLaws/PartI/TitleII/Chapter25A/Section11F
+    section: "+2 points a year through 2024, +3 through 2029, +1 a year thereafter"
+    checked_on: 2026-10-22
+  re_guidance:
+    title: BERDO Renewable Energy and Emissions Compliance Guidance (April 2024)
+    url: https://www.boston.gov/sites/default/files/file/2024/04/BERDO%20Renewable%20Energy%20and%20Emissions%20Compliance%20Guidance.pdf
+    section: "FAQ 1: 2024 RPS Class I requirement is 24%"
+    checked_on: 2026-10-22
+  disclosure_2026:
+    title: BERDO 2026 disclosure (2025 data), data.boston.gov, ODC-PDDL
+    url: https://data.boston.gov/dataset/building-emissions-reduction-and-disclosure-ordinance
+    checked_on: 2026-10-22
+
+metrics: [ghg_intensity]
+threshold_basis: property_type_table
+compliance_periods:
+  - {id: "2025-2029", start_year: 2025, end_year: 2029, source: ordinance}
+  - {id: "2030-2034", start_year: 2030, end_year: 2034, source: ordinance}
+  - {id: "2035-2039", start_year: 2035, end_year: 2039, source: ordinance}
+  - {id: "2040-2044", start_year: 2040, end_year: 2044, source: ordinance}
+  - {id: "2045-2049", start_year: 2045, end_year: 2049, source: ordinance}
+  - {id: "2050+", start_year: 2050, source: ordinance}
+
+thresholds:
+  unit: kgCO2e/sf/yr
+  source: ordinance
+  section: "§7-2.2(i), Table 1: CO2e Emissions Standards by Building Use"
+  by_class:
+    "Assembly": {"2025-2029": 7.8, "2030-2034": 4.6, "2035-2039": 3.3, "2040-2044": 2.1, "2045-2049": 1.1, "2050+": 0}
+    "College/University": {"2025-2029": 10.2, "2030-2034": 5.3, "2035-2039": 3.8, "2040-2044": 2.5, "2045-2049": 1.2, "2050+": 0}
+    "Education": {"2025-2029": 3.9, "2030-2034": 2.4, "2035-2039": 1.8, "2040-2044": 1.2, "2045-2049": 0.6, "2050+": 0}
+    "Food Sales & Service": {"2025-2029": 17.4, "2030-2034": 10.9, "2035-2039": 8.0, "2040-2044": 5.4, "2045-2049": 2.7, "2050+": 0}
+    "Healthcare": {"2025-2029": 15.4, "2030-2034": 10.0, "2035-2039": 7.4, "2040-2044": 4.9, "2045-2049": 2.4, "2050+": 0}
+    "Lodging": {"2025-2029": 5.8, "2030-2034": 3.7, "2035-2039": 2.7, "2040-2044": 1.8, "2045-2049": 0.9, "2050+": 0}
+    "Manufacturing/Industrial": {"2025-2029": 23.9, "2030-2034": 15.3, "2035-2039": 10.9, "2040-2044": 6.7, "2045-2049": 3.2, "2050+": 0}
+    "Multifamily Housing": {"2025-2029": 4.1, "2030-2034": 2.4, "2035-2039": 1.8, "2040-2044": 1.1, "2045-2049": 0.6, "2050+": 0}
+    "Office": {"2025-2029": 5.3, "2030-2034": 3.2, "2035-2039": 2.4, "2040-2044": 1.6, "2045-2049": 0.8, "2050+": 0}
+    "Retail": {"2025-2029": 7.1, "2030-2034": 3.4, "2035-2039": 2.4, "2040-2044": 1.5, "2045-2049": 0.7, "2050+": 0}
+    "Services": {"2025-2029": 7.5, "2030-2034": 4.5, "2035-2039": 3.3, "2040-2044": 2.2, "2045-2049": 1.1, "2050+": 0}
+    "Storage": {"2025-2029": 5.4, "2030-2034": 2.8, "2035-2039": 1.8, "2040-2044": 1.0, "2045-2049": 0.4, "2050+": 0}
+    "Technology/Science": {"2025-2029": 19.2, "2030-2034": 11.1, "2035-2039": 7.8, "2040-2044": 5.1, "2045-2049": 2.5, "2050+": 0}
+
+emission_factors:                  # kgCO2e/MMBtu (fuels, district energy) and kgCO2e/MWh (grid electricity)
+  natural_gas: {unit: kgCO2e/MMBtu, source: factor_list, values: {"2023+": 53.11}}
+  propane: {unit: kgCO2e/MMBtu, source: factor_list, values: {"2023+": 64.25}}
+  fuel_oil_1: {unit: kgCO2e/MMBtu, source: factor_list, values: {"2023+": 73.5}}
+  fuel_oil_2: {unit: kgCO2e/MMBtu, source: factor_list, values: {"2023+": 74.21}}
+  fuel_oil_4: {unit: kgCO2e/MMBtu, source: factor_list, values: {"2023+": 75.29}}
+  fuel_oil_5_6: {unit: kgCO2e/MMBtu, source: factor_list, values: {"2023+": 75.35}}
+  diesel: {unit: kgCO2e/MMBtu, source: factor_list, values: {"2023+": 74.21}}
+  kerosene: {unit: kgCO2e/MMBtu, source: factor_list, values: {"2023+": 77.69}}
+  district_steam:
+    unit: kgCO2e/MMBtu
+    source: factor_list
+    values: {"2023+": 66.40}
+    note: >-
+      ENERGY STAR default. Operators submit system factors (2024 list: Vicinity Boston 55.2, Longfellow Loop 51.6,
+      MATEP 63.7); the 2026 disclosure applies 58.1 to most Vicinity customers, a value no public document gives.
+      Pass a system factor as an override when known.
+  district_hot_water: {unit: kgCO2e/MMBtu, source: factor_list, values: {"2023+": 66.40}}
+  district_chilled_water: {unit: kgCO2e/MMBtu, source: factor_list, values: {"2023+": 52.70}, note: "electric-driven chiller default"}
+  electricity:
+    unit: kgCO2e/MWh
+    source: policies_procedures
+    section: "Appendix B, projected grid emissions factors (Regulations §VIII.a.ii(a): the projected factor caps the annual one)"
+    values: {"2025": 249, "2026": 242, "2027": 265, "2028": 265, "2029": 264, "2030": 259, "2031": 254, "2032": 249, "2033": 243, "2034": 237, "2035": 231, "2036": 224, "2037": 217, "2038": 211, "2039": 204, "2040": 198, "2041": 192, "2042": 187, "2043": 182, "2044": 177, "2045": 173, "2046": 168, "2047": 163, "2048": 159, "2049": 155, "2050": 150}
+
+electricity:
+  rps_exempt_share: {"2024": 0.24, "2025": 0.27, "2026": 0.3, "2027": 0.33, "2028": 0.36, "2029": 0.39, "2030": 0.4, "2031": 0.41, "2032": 0.42, "2033": 0.43, "2034": 0.44, "2035": 0.45, "2036": 0.46, "2037": 0.47, "2038": 0.48, "2039": 0.49, "2040": 0.5, "2041": 0.51, "2042": 0.52, "2043": 0.53, "2044": 0.54, "2045": 0.55, "2046": 0.56, "2047": 0.57, "2048": 0.58, "2049": 0.59, "2050": 0.6}
+  subtract_renewable_kwh: true
+  source: policies_procedures
+  section: "§5.B-C: kWh × (100% − RPS Class I [− BCCE RECs]) × grid factor"
+  note: >-
+    RPS shares from M.G.L. c.25A §11F (mgl_rps) anchored at 24% in 2024 (re_guidance). Renewable kWh reported to
+    the city come off after the RPS share: max(0, kWh × (1 − RPS) − renewable kWh) reproduces 100% of the
+    2026 disclosure's electricity emissions.
+
+blending:
+  method: largest_primary_use
+  optional_method: primary_use_blend
+  primary_use_min_share: 0.10
+  source: policies_procedures
+  section: "Ordinance §7-2.2(i)(i); P&P §6.A-B (non-primary sq ft is added to the largest primary use); default per flexibility_guide"
+
+penalty:
+  kind: per_unit_over_limit
+  unit: tCO2e
+  rate: 234
+  source: ordinance
+  section: "§7-2.2 compliance mechanisms (d): Alternative Compliance Payment, initially $234 per metric ton CO2e"
+  note: >-
+    BERDO has no per-ton fine: the ACP is what covering excess emissions costs, and open-bps reports it as the
+    exposure. A building that neither complies nor pays faces fines of $1,000 a day (35,000+ sq ft or 35+ units)
+    or $300 a day (20,000-35,000 sq ft or 15-34 units), §7-2.2 enforcement (ii).
+
+unassignable_types:
+  "Other": "not listed in P&P Appendix A; the Environment Department assigns a Building Use"
+  "Electric Vehicle Charging Station": "not listed in P&P Appendix A"
+  "Mixed Use Property": "not listed in P&P Appendix A"
+
+notes:
+  - "Buildings of 20,000-35,000 sq ft (or 15-34 units) are subject to emissions standards from 2030 (§7-2.2(i))."
+  - "Fuel factors are the city's 2023+ list; the Environment Department may update them each April 15 (Regulations §VIII.a)."
+  - "Grid factors are the projected factors in P&P Appendix B, which cap the annual factor; the annual factor can be lower."
+  - "Not modelled: Individual Compliance Schedules, Hardship Compliance Plans, Building Portfolios, campus district energy, EV and backup-generation exemptions."
+
+property_type_map:                 # ESPM property type -> Building Use (P&P Appendix A)
+  "Aquarium": {to: "Assembly", source: policies_procedures}
+  "Convention Center": {to: "Assembly", source: policies_procedures}
+  "Fitness Center/Health Club/Gym": {to: "Assembly", source: policies_procedures}
+  "Heated Swimming Pool": {to: "Assembly", source: policies_procedures}
+  "Indoor Arena": {to: "Assembly", source: policies_procedures}
+  "Ice/Curling Rink": {to: "Assembly", source: policies_procedures}
+  "Museum": {to: "Assembly", source: policies_procedures}
+  "Movie Theater": {to: "Assembly", source: policies_procedures}
+  "Other - Entertainment/Public Assembly": {to: "Assembly", source: policies_procedures}
+  "Other - Recreation": {to: "Assembly", source: policies_procedures}
+  "Other - Stadium": {to: "Assembly", source: policies_procedures}
+  "Performing Arts": {to: "Assembly", source: policies_procedures}
+  "Race Track": {to: "Assembly", source: policies_procedures}
+  "Social/Meeting Hall": {to: "Assembly", source: policies_procedures}
+  "Stadium (Open)": {to: "Assembly", source: policies_procedures}
+  "Stadium (Closed)": {to: "Assembly", source: policies_procedures}
+  "Swimming Pool": {to: "Assembly", source: policies_procedures}
+  "Worship Facility": {to: "Assembly", source: policies_procedures}
+  "Bowling Alley": {to: "Assembly", source: policies_procedures}
+  "Casino": {to: "Assembly", source: policies_procedures}
+  "Roller Rink": {to: "Assembly", source: policies_procedures}
+  "Zoo": {to: "Assembly", source: policies_procedures}
+  "Boat marinas": {to: "Assembly", source: policies_procedures}
+  "Movie Production studios": {to: "Assembly", source: policies_procedures}
+  "TV / Radio Broadcast studios": {to: "Assembly", source: policies_procedures}
+  "College/University": {to: "College/University", source: policies_procedures}
+  "Adult Education": {to: "Education", source: policies_procedures}
+  "K-12 School": {to: "Education", source: policies_procedures}
+  "Other - Education": {to: "Education", source: policies_procedures}
+  "Pre-school/Daycare": {to: "Education", source: policies_procedures}
+  "Vocational School": {to: "Education", source: policies_procedures}
+  "Bar/Nightclub": {to: "Food Sales & Service", source: policies_procedures}
+  "Fast Food Restaurant": {to: "Food Sales & Service", source: policies_procedures}
+  "Food Sales": {to: "Food Sales & Service", source: policies_procedures}
+  "Food Service": {to: "Food Sales & Service", source: policies_procedures}
+  "Other - Restaurant/Bar": {to: "Food Sales & Service", source: policies_procedures}
+  "Restaurant": {to: "Food Sales & Service", source: policies_procedures}
+  "Supermarket/Grocery Store": {to: "Food Sales & Service", source: policies_procedures}
+  "Ambulatory Surgical Center": {to: "Healthcare", source: policies_procedures}
+  "Hospital (General Medical & Surgical)": {to: "Healthcare", source: policies_procedures}
+  "Medical Office": {to: "Healthcare", source: policies_procedures}
+  "Other - Specialty Hospital": {to: "Healthcare", source: policies_procedures}
+  "Outpatient Rehabilitation/Physical Therapy": {to: "Healthcare", source: policies_procedures}
+  "Urgent Care/Clinic/Other Outpatient": {to: "Healthcare", source: policies_procedures}
+  "Veterinary Office": {to: "Healthcare", source: policies_procedures}
+  "Residential Care Facility": {to: "Healthcare", source: policies_procedures}
+  "Senior Living Community": {to: "Healthcare", source: policies_procedures}
+  "Barracks": {to: "Lodging", source: policies_procedures}
+  "Hotel": {to: "Lodging", source: policies_procedures}
+  "Other - Lodging/Residential": {to: "Lodging", source: policies_procedures}
+  "Residence Hall/Dormitory": {to: "Lodging", source: policies_procedures}
+  "Single Family Home": {to: "Lodging", source: policies_procedures}
+  "Prison/Incarceration": {to: "Lodging", source: policies_procedures}
+  "Manufacturing/ Industrial": {to: "Manufacturing/Industrial", source: policies_procedures}
+  "Hydroponic, Greenhouse and other growing facilities": {to: "Manufacturing/Industrial", source: policies_procedures}
+  "Multifamily housing": {to: "Multifamily Housing", source: policies_procedures}
+  "Financial Office": {to: "Office", source: policies_procedures}
+  "Office": {to: "Office", source: policies_procedures}
+  "Automobile Dealership": {to: "Retail", source: policies_procedures}
+  "Bank Branch": {to: "Retail", source: policies_procedures}
+  "Enclosed Mall": {to: "Retail", source: policies_procedures}
+  "Lifestyle Center": {to: "Retail", source: policies_procedures}
+  "Other - Mall": {to: "Retail", source: policies_procedures}
+  "Retail Store": {to: "Retail", source: policies_procedures}
+  "Strip Mall": {to: "Retail", source: policies_procedures}
+  "Wholesale Club/Supercenter": {to: "Retail", source: policies_procedures}
+  "Convenience Store without Gas Station": {to: "Services", source: policies_procedures}
+  "Courthouse": {to: "Services", source: policies_procedures}
+  "Energy/Power Station": {to: "Services", source: policies_procedures}
+  "Fire Station": {to: "Services", source: policies_procedures}
+  "Library": {to: "Services", source: policies_procedures}
+  "Other - Public Services": {to: "Services", source: policies_procedures}
+  "Other - Services": {to: "Services", source: policies_procedures}
+  "Other - Utility": {to: "Services", source: policies_procedures}
+  "Personal Services (Health/Beauty Dry Cleaning etc.)": {to: "Services", source: policies_procedures}
+  "Police Station": {to: "Services", source: policies_procedures}
+  "Repair Services (Vehicle, Shoe, Locksmith, etc.)": {to: "Services", source: policies_procedures}
+  "Drinking Water Treatment & Distribution": {to: "Services", source: policies_procedures}
+  "Mailing Center/Post Office": {to: "Services", source: policies_procedures}
+  "Transportation Terminal/Station": {to: "Services", source: policies_procedures}
+  "Wastewater Treatment Plant": {to: "Services", source: policies_procedures}
+  "Distribution Center": {to: "Storage", source: policies_procedures}
+  "Non-Refrigerated Warehouse": {to: "Storage", source: policies_procedures}
+  "Parking": {to: "Storage", source: policies_procedures}
+  "Refrigerated Warehouse": {to: "Storage", source: policies_procedures}
+  "Self-Storage Facility": {to: "Storage", source: policies_procedures}
+  "Data Center": {to: "Technology/Science", source: policies_procedures}
+  "Laboratory": {to: "Technology/Science", source: policies_procedures}
+  "Other - Technology/Science": {to: "Technology/Science", source: policies_procedures}
+  "Manufacturing/Industrial Plant": {to: "Manufacturing/Industrial", basis: rename, source: policies_procedures, note: "current ESPM name for Appendix A 'Manufacturing/ Industrial'"}
+  "Multifamily Housing": {to: "Multifamily Housing", basis: rename, source: policies_procedures, note: "current ESPM name for Appendix A 'Multifamily housing'"}
+  "Personal Services (Health/Beauty, Dry Cleaning, etc)": {to: "Services", basis: rename, source: policies_procedures, note: "current ESPM name for Appendix A 'Personal Services (Health/Beauty Dry Cleaning etc.)'"}
+  "Vehicle Repair Services": {to: "Services", basis: rename, source: policies_procedures, note: "current ESPM name for Appendix A 'Repair Services (Vehicle, Shoe, Locksmith, etc.)'"}
+  "Vehicle Dealership": {to: "Retail", basis: rename, source: policies_procedures, note: "current ESPM name for Appendix A 'Automobile Dealership'"}
+  "Other/Specialty Hospital": {to: "Healthcare", basis: rename, source: policies_procedures, note: "current ESPM name for Appendix A 'Other - Specialty Hospital'"}
+  "Single-Family Home": {to: "Lodging", basis: rename, source: policies_procedures, note: "current ESPM name for Appendix A 'Single Family Home'"}
+  "Community Center and Social Meeting Hall": {to: "Assembly", basis: rename, source: policies_procedures, note: "current ESPM name for Appendix A 'Social/Meeting Hall'"}

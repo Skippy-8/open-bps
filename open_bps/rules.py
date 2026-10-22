@@ -2,17 +2,23 @@
 
 Rules change (Denver rewrote its schedule and rates in April 2025), so the engines never hard-code a
 rate or a year: they read it from here, and every output row carries the `rule_version` it used.
+
+Since 0.2.0 the files live in `open_bps/jurisdictions/` and are validated by the policy registry
+(`open_bps.registry`). `load()` is kept for the DC and Denver engines: it validates through the registry and
+returns the file without the registry header, exactly the dict 0.1.0 returned.
 """
 from __future__ import annotations
 
 from functools import lru_cache
-from pathlib import Path
 
-import yaml
+from open_bps import registry
+from open_bps.policy import JurisdictionPolicy
 
-RULES_DIR = Path(__file__).parent / "rules"
-FILES = {"dc": "dc_beps_cycle1.yaml", "denver": "denver_energize_25k.yaml"}
+RULES_DIR = registry.JURISDICTIONS_DIR
+FILES = {"dc": "dc_beps.yaml", "denver": "denver_energize.yaml"}
 REQUIRED = ("jurisdiction", "program", "rule_version", "effective_from", "checked_on", "sources")
+# Keys the registry added in 0.2.0; everything else in a DC or Denver file is the 0.1.0 rule text.
+REGISTRY_KEYS = frozenset(JurisdictionPolicy.model_fields) - set(REQUIRED)
 
 
 class RuleError(ValueError):
@@ -24,15 +30,19 @@ def load(jurisdiction: str) -> dict:
     """The rule set for `jurisdiction` ("dc" or "denver"), validated."""
     if jurisdiction not in FILES:
         raise RuleError(f"unknown jurisdiction {jurisdiction!r}; available: {sorted(FILES)}")
-    path = RULES_DIR / FILES[jurisdiction]
-    rules = yaml.safe_load(path.read_text())
+    name = FILES[jurisdiction]
+    try:
+        registry.get_policy(jurisdiction)
+    except registry.PolicyError as e:
+        raise RuleError(str(e)) from None
+    rules = {k: v for k, v in registry.raw(jurisdiction).items() if k not in REGISTRY_KEYS}
     missing = [k for k in REQUIRED if k not in rules]
     if missing:
-        raise RuleError(f"{path.name}: missing {missing}")
-    for name, src in rules["sources"].items():
+        raise RuleError(f"{name}: missing {missing}")
+    for src_name, src in rules["sources"].items():
         if not isinstance(src, dict) or not src.get("url"):
-            raise RuleError(f"{path.name}: source {name!r} needs a url")
-    _check(jurisdiction, rules, path.name)
+            raise RuleError(f"{name}: source {src_name!r} needs a url")
+    _check(jurisdiction, rules, name)
     return rules
 
 

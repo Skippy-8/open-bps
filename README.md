@@ -91,7 +91,7 @@ To run the app: `pip install "open-bps[app]"`, then
 ## How it is built
 
 ```
-open_bps/rules/*.yaml     the law, by jurisdiction and version; every value cites its primary source
+open_bps/jurisdictions/  the law as validated policies (one YAML per jurisdiction); every value cites its source
 open_bps/sources/         fetchers: DC GIS FeatureServer (DOEE), Denver open data hub (CASR)
 open_bps/canonical.py     one schema per city; every building keeps a screen_status, none dropped silently
 open_bps/engine/          pure functions per jurisdiction: verdicts, gaps, payments, penalties

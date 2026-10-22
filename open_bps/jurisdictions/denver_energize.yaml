@@ -48,3 +48,18 @@ rates_per_kbtu:                                # source: tg_v3 Table 17 (rates h
   maintenance_over_5pct: 0.15
 no_report_penalty_per_sq_ft: 5.00              # assessor's square footage; Table 17
 enforcement_start: "No penalties will be levied until late 2029 based on compliance"   # tg_v3 section 1.3.4
+
+# ---- Policy registry header (open_bps.policy.JurisdictionPolicy). rules.load("denver") returns this file without
+# ---- these keys, exactly as in 0.1.0.
+id: denver_energize
+metrics: [weather_normalized_site_eui]
+threshold_basis: building_data               # interim and final targets per building are in the Master Dataset
+compliance_periods:
+  - {id: interim, start_year: 2025, end_year: 2029, source: tg_v3, note: "original 2025/2027 or extended 2028 interim targets"}
+  - {id: final, start_year: 2030, source: tg_v3, note: "final target 2030 (original) or 2032 (extended)"}
+penalty:
+  kind: per_unit_over_limit
+  unit: kBtu
+  rates_by_schedule: {original: 0.15, extended: 0.23}
+  source: tg_v3
+  section: Table 17

@@ -1,0 +1,134 @@
+{
+ "dc": {
+  "checked_on": "2026-10-20",
+  "cycle": {
+   "compliance_cycle_end": "2026-12-31",
+   "end_of_cycle_reporting_due": "2027-05-03",
+   "next_standards_by": "2029-01-01",
+   "standards_established": "2021-01-01"
+  },
+  "effective_from": "2021-01-01",
+  "jurisdiction": "Washington, DC",
+  "max_payment": {
+   "campus_cap": 7500000,
+   "cap_per_building": 7500000,
+   "full_maximum_when": [
+    "required information not submitted",
+    "knowingly inaccurate information"
+   ],
+   "per_sq_ft_gfa": 10.0
+  },
+  "meets_standard": {
+   "metric_year": 2019,
+   "rule": {
+    "ENERGYSTARSCORE": "metric >= standard",
+    "eui_metrics": "metric <= standard"
+   }
+  },
+  "pathways": {
+   "alternative_compliance": {
+    "payment_adjustment": "per the building's ACP agreement with DOEE; no less stringent than other pathways (\u00a7 3519.8)"
+   },
+   "performance": {
+    "baseline_years": [
+     2018,
+     2019
+    ],
+    "evaluation_year": 2026,
+    "metric": "Adjusted Site EUI (Portfolio Manager models in effect 2021-01-01) for property types that receive an ENERGY STAR score, otherwise Site EUI. DOEE publishes Adjusted Site EUI only on the owner portal, so a public-data estimate uses Site EUI and must be labelled Estimated.",
+    "payment_adjustment": "max_payment * (1 - min(1, reduction_achieved / 0.20))",
+    "required_reduction": 0.2,
+    "source": "guidebook_ch31"
+   },
+   "prescriptive": {
+    "payment_adjustment": "max_payment * (1 - points_earned / points_needed)"
+   },
+   "standard_target": {
+    "payment_adjustment": "max_payment * distance_remaining / distance_of_building_20pct_less_efficient_than_standard (example in Table 21: 6 / 15 = 40%)",
+    "source": "guidebook_ch32"
+   }
+  },
+  "program": "BEPS",
+  "rule_version": "dc_beps_cycle1_guidebook_v1.2",
+  "sources": {
+   "disclosure_data": {
+    "title": "DOEE Building Energy Performance Data (DC GIS FeatureServer layer 75)",
+    "url": "https://maps2.dcgis.dc.gov/DCGIS/rest/services/DCGIS_DATA/Environment_Energy_WebMercator/FeatureServer/75"
+   },
+   "guidebook_ch31": {
+    "section": "Chapter 3.1 Performance Pathway",
+    "url": "https://dc.beam-portal.org/helpdesk/kb/BEPS_Guidebook/66/"
+   },
+   "guidebook_ch32": {
+    "section": "Chapter 3.2 Standard Target Pathway",
+    "url": "https://dc.beam-portal.org/helpdesk/kb/BEPS_Guidebook/67/"
+   },
+   "guidebook_ch7": {
+    "section": "Chapter 7, Table 21",
+    "url": "https://dc.beam-portal.org/helpdesk/kb/BEPS_Guidebook/129/"
+   },
+   "guidebook_v12": {
+    "note": "plain-language explanation of the CEDC Act 2018 and 20 DCMR Chapter 35 (\u00a7\u00a7 3518, 3519.8, 3521.1)",
+    "title": "BEPS Compliance and Enforcement Guidebook, Compliance Cycle 1, version 1.2 (published 2026-08-11)",
+    "url": "https://dc.beam-portal.org/helpdesk/kb/BEPS_Guidebook/"
+   },
+   "timeline": {
+    "section": "What is the timeline of the BEPS Program?",
+    "url": "https://dc.beam-portal.org/helpdesk/kb/BEPS_Guidebook/28/"
+   }
+  }
+ },
+ "denver": {
+  "checked_on": "2026-10-20",
+  "effective_from": "2025-04-01",
+  "enforcement_start": "No penalties will be levied until late 2029 based on compliance",
+  "jurisdiction": "Denver, CO",
+  "metric": "Weather-normalized site EUI for the performance year, less any renewable credit, transportation energy and electrification incentive (tg_v3 glossary \"EUI\" and section 9.4). Public data has the weather-normalized site EUI but not the credits, so a public-data estimate is an upper bound on the building's EUI.",
+  "no_report_penalty_per_sq_ft": 5.0,
+  "performance_evaluation": {
+   "kbtu_not_achieved": "max(0, (eui - target_eui) * gross_floor_area)",
+   "penalty": "kbtu_not_achieved * rate_per_kbtu",
+   "worked_example": "10 kBtu/sf over target x 100,000 sf = 1,000,000 kBtu; x $0.35 = $350,000 (one-period rate)"
+  },
+  "program": "Energize Denver (performance requirements, buildings >= 25,000 sq ft)",
+  "rates_per_kbtu": {
+   "late_extension_addition": 0.1,
+   "maintenance_over_5pct": 0.15,
+   "maintenance_within_5pct": 0.05,
+   "new_covered_building": 0.15,
+   "one_period": 0.35,
+   "three_periods": 0.15,
+   "two_periods": 0.23
+  },
+  "rule_version": "denver_tg_25k_v3_2025-04",
+  "schedules": {
+   "extended": {
+    "note": "Opt-in when submitting the 2025 benchmarking report: the 2024/2025/2026 interim target moves to 2028, the 2027 interim target is eliminated, and the final target moves from 2030 to 2032.",
+    "rate_per_kbtu": 0.23,
+    "target_years": {
+     "final": 2032,
+     "first_interim": 2028
+    }
+   },
+   "open_question": "The public dataset does not say which buildings opted into the extension; show both schedules until Denver publishes it or a building's owner supplies it.",
+   "original": {
+    "rate_per_kbtu": 0.15,
+    "target_years": {
+     "final": 2030,
+     "first_interim": 2025,
+     "second_interim": 2027
+    }
+   }
+  },
+  "sources": {
+   "master_dataset_2025": {
+    "title": "Energize Denver 2025 Master Dataset (Denver open data hub)",
+    "url": "https://www.arcgis.com/sharing/rest/content/items/169272beebc54212ac08f3f607bef272/data"
+   },
+   "tg_v3": {
+    "title": "Energize Denver Technical Guidance, Buildings 25,000 sq ft or larger, v3 (April 2025)",
+    "url": "https://www.denvergov.org/files/assets/public/v/1/climate-action/documents/buildings-and-homes/energize-denver/rules-and-tg/ed-technical-guidance-buildings-25k-sf-v3-april-2025-clean.pdf"
+   }
+  }
+ }
+}

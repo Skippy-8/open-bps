@@ -58,3 +58,17 @@ max_payment:                                   # source: guidebook_ch7
   cap_per_building: 7500000
   campus_cap: 7500000                          # single maximum for College/University and Hospital campuses
   full_maximum_when: [required information not submitted, knowingly inaccurate information]
+
+# ---- Policy registry header (open_bps.policy.JurisdictionPolicy). rules.load("dc") returns this file without
+# ---- these keys, exactly as in 0.1.0.
+id: dc_beps
+metrics: [energy_star_score, weather_normalized_source_eui, source_eui]   # DOEE assigns one per building
+threshold_basis: building_data               # each building's standard is in DOEE's disclosure (layer 75)
+compliance_periods:
+  - {id: cycle1, start_year: 2021, end_year: 2026, source: timeline}
+penalty:
+  kind: capped_payment_pathway
+  per_sq_ft: 10.00
+  cap: 7500000
+  source: guidebook_ch7
+  section: Chapter 7, Table 21

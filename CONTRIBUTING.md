@@ -10,7 +10,7 @@ Issues and pull requests are welcome, especially:
 A new city needs four pieces. NYC Local Law 97 and Boston BERDO are the next candidates; both publish
 building-level data.
 
-1. **A rule file**, `open_bps/rules/<city>_<program>.yaml`. Every value cites the regulator's own document (law,
+1. **A rule file**, `open_bps/jurisdictions/<city>_<program>.yaml`, validated by `open_bps.policy.JurisdictionPolicy`. Every value cites the regulator's own document (law,
    regulation or official guidance) with a URL and the date it was checked. Consultant summaries are not sources.
 2. **A fetcher**, `open_bps/sources/<city>.py`, that writes a dated raw snapshot with `write_manifest`.
 3. **A canonical mapping** in `open_bps/canonical.py`. Every building keeps a `screen_status`; nothing is dropped

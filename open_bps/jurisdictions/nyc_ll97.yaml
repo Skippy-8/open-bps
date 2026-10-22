@@ -1,0 +1,274 @@
+# New York City: Local Law 97 of 2019 (NYC Admin Code Article 320) and 1 RCNY §103-14.
+# Every number cites its primary source. Limits by ESPM property type come from 1 RCNY §103-14(c)(3); they were
+# parsed from the rule PDF (60 types for each period) and spot-checked by hand in tests/test_policy.py.
+id: nyc_ll97
+jurisdiction: New York City, NY
+program: Local Law 97 (Article 320 building emissions limits)
+rule_version: nyc_ll97_rcny_103-14_2024
+effective_from: 2024-01-01
+checked_on: 2026-10-22
+
+sources:
+  rcny_103_14:
+    title: 1 RCNY §103-14, Department of Buildings rule on building emissions limits (as promulgated)
+    url: https://www.nyc.gov/assets/buildings/rules/1_RCNY_103-14.pdf
+    checked_on: 2026-10-22
+  dob_emissions_2024:
+    title: "DOB, Local Law 97: calculating building emissions (June 26, 2024); quotes Admin Code §28-320.3.1.1"
+    url: https://www.nyc.gov/assets/buildings/pdf/ll97_emissions.pdf
+    note: >-
+      The Admin Code text on amlegal.com is behind a Cloudflare check; DOB's own presentation quoting §28-320.3.1.1 is
+      cited instead. Its 2035+ electricity and steam coefficients are DOB projections, not law.
+    checked_on: 2026-10-22
+  dob_article_320_guide:
+    title: DOB Article 320 Info Guide, rev. 06/30/2025
+    url: https://www.nyc.gov/assets/buildings/pdf/article_320_guide.pdf
+    section: "IV(A) ESPM categories (pp.73-75); worked example pp.122-123; §28-320.6 penalty"
+    checked_on: 2026-10-22
+  ll84_disclosure:
+    title: NYC Building Energy and Water Data Disclosure for Local Law 84, 2023 to present (NYC Open Data 5zyy-y8am)
+    url: https://data.cityofnewyork.us/Environment/NYC-Building-Energy-and-Water-Data-Disclosure-for-/5zyy-y8am
+    checked_on: 2026-10-22
+
+metrics: [ghg_intensity]
+threshold_basis: property_type_table
+compliance_periods:
+  - {id: "2024-2029", start_year: 2024, end_year: 2029, source: rcny_103_14}
+  - {id: "2030-2034", start_year: 2030, end_year: 2034, source: rcny_103_14}
+  - {id: "2035-2039", start_year: 2035, end_year: 2039, source: rcny_103_14}
+  - {id: "2040-2049", start_year: 2040, end_year: 2049, source: rcny_103_14}
+  - {id: "2050+", start_year: 2050, source: rcny_103_14}
+
+thresholds:
+  unit: tCO2e/sf/yr
+  source: rcny_103_14
+  section: "§103-14(c)(3)(i)-(vi)"
+  by_class:
+      "Adult Education": {"2024-2029": 0.00758, "2030-2034": 0.003565528, "2035-2039": 0.002674146, "2040-2049": 0.001782764, "2050+": 0.0}
+      "Ambulatory Surgical Center": {"2024-2029": 0.01181, "2030-2034": 0.008980612, "2035-2039": 0.006735459, "2040-2049": 0.004490306, "2050+": 0.0}
+      "Automobile Dealership": {"2024-2029": 0.00675, "2030-2034": 0.002824097, "2035-2039": 0.002118072, "2040-2049": 0.001412048, "2050+": 0.0}
+      "Bank Branch": {"2024-2029": 0.00987, "2030-2034": 0.004036172, "2035-2039": 0.003027129, "2040-2049": 0.002018086, "2050+": 0.0}
+      "Bowling Alley": {"2024-2029": 0.00574, "2030-2034": 0.003103815, "2035-2039": 0.002327861, "2040-2049": 0.001551907, "2050+": 0.0}
+      "College/University": {"2024-2029": 0.00987, "2030-2034": 0.002099748, "2035-2039": 0.001236322, "2040-2049": 0.000180818, "2050+": 0.0}
+      "Convenience Store without Gas Station": {"2024-2029": 0.00675, "2030-2034": 0.003540032, "2035-2039": 0.002655024, "2040-2049": 0.001770016, "2050+": 0.0}
+      "Courthouse": {"2024-2029": 0.00426, "2030-2034": 0.001480533, "2035-2039": 0.0011104, "2040-2049": 0.000740266, "2050+": 0.0}
+      "Data Center": {"2024-2029": 0.02381, "2030-2034": 0.014791131, "2035-2039": 0.011093348, "2040-2049": 0.007395565, "2050+": 0.0}
+      "Distribution Center": {"2024-2029": 0.00574, "2030-2034": 0.0009916, "2035-2039": 0.000549637, "2040-2049": 0.000123568, "2050+": 0.0}
+      "Enclosed Mall": {"2024-2029": 0.01074, "2030-2034": 0.003983803, "2035-2039": 0.002987852, "2040-2049": 0.001991901, "2050+": 0.0}
+      "Financial Office": {"2024-2029": 0.00846, "2030-2034": 0.003697004, "2035-2039": 0.002772753, "2040-2049": 0.001848502, "2050+": 0.0}
+      "Fitness Center/Health Club/Gym": {"2024-2029": 0.00987, "2030-2034": 0.003946728, "2035-2039": 0.002960046, "2040-2049": 0.001973364, "2050+": 0.0}
+      "Food Sales": {"2024-2029": 0.01181, "2030-2034": 0.00520888, "2035-2039": 0.00390666, "2040-2049": 0.00260444, "2050+": 0.0}
+      "Food Service": {"2024-2029": 0.01181, "2030-2034": 0.007749414, "2035-2039": 0.00581206, "2040-2049": 0.003874707, "2050+": 0.0}
+      "Hospital (General Medical & Surgical)": {"2024-2029": 0.02381, "2030-2034": 0.007335204, "2035-2039": 0.004654044, "2040-2049": 0.002997851, "2050+": 0.0}
+      "Hotel": {"2024-2029": 0.00987, "2030-2034": 0.003850668, "2035-2039": 0.002640017, "2040-2049": 0.001465772, "2050+": 0.0}
+      "K-12 School": {"2024-2029": 0.00675, "2030-2034": 0.002230588, "2035-2039": 0.001488109, "2040-2049": 0.000809607, "2050+": 0.0}
+      "Laboratory": {"2024-2029": 0.02381, "2030-2034": 0.026029868, "2035-2039": 0.019522401, "2040-2049": 0.013014934, "2050+": 0.0}
+      "Library": {"2024-2029": 0.00675, "2030-2034": 0.002218412, "2035-2039": 0.001663809, "2040-2049": 0.001109206, "2050+": 0.0}
+      "Lifestyle Center": {"2024-2029": 0.00846, "2030-2034": 0.00470585, "2035-2039": 0.003529387, "2040-2049": 0.002352925, "2050+": 0.0}
+      "Mailing Center/Post Office": {"2024-2029": 0.00426, "2030-2034": 0.00198044, "2035-2039": 0.00148533, "2040-2049": 0.00099022, "2050+": 0.0}
+      "Manufacturing/Industrial Plant": {"2024-2029": 0.00758, "2030-2034": 0.00141703, "2035-2039": 0.000975993, "2040-2049": 0.000508346, "2050+": 0.0}
+      "Medical Office": {"2024-2029": 0.01074, "2030-2034": 0.002912778, "2035-2039": 0.001683565, "2040-2049": 0.000407851, "2050+": 0.0}
+      "Movie Theater": {"2024-2029": 0.01181, "2030-2034": 0.005395268, "2035-2039": 0.004046451, "2040-2049": 0.002697634, "2050+": 0.0}
+      "Multifamily Housing": {"2024-2029": 0.00675, "2030-2034": 0.00334664, "2035-2039": 0.002692183, "2040-2049": 0.002052731, "2050+": 0.0}
+      "Museum": {"2024-2029": 0.01181, "2030-2034": 0.0053958, "2035-2039": 0.00404685, "2040-2049": 0.0026979, "2050+": 0.0}
+      "Non-Refrigerated Warehouse": {"2024-2029": 0.00426, "2030-2034": 0.000883187, "2035-2039": 0.000568051, "2040-2049": 0.000163152, "2050+": 0.0}
+      "Office": {"2024-2029": 0.00758, "2030-2034": 0.002690852, "2035-2039": 0.00165234, "2040-2049": 0.000581893, "2050+": 0.0}
+      "Other - Education": {"2024-2029": 0.00846, "2030-2034": 0.002934006, "2035-2039": 0.001867699, "2040-2049": 0.000839571, "2050+": 0.0}
+      "Other - Entertainment/Public Assembly": {"2024-2029": 0.00987, "2030-2034": 0.002956738, "2035-2039": 0.002250122, "2040-2049": 0.00135561, "2050+": 0.0}
+      "Other - Lodging/Residential": {"2024-2029": 0.00758, "2030-2034": 0.001901982, "2035-2039": 0.001329089, "2040-2049": 0.000762093, "2050+": 0.0}
+      "Other - Mall": {"2024-2029": 0.01074, "2030-2034": 0.001928226, "2035-2039": 0.001006426, "2040-2049": 6.7983e-05, "2050+": 0.0}
+      "Other - Public Services": {"2024-2029": 0.00758, "2030-2034": 0.003808033, "2035-2039": 0.002856025, "2040-2049": 0.001904017, "2050+": 0.0}
+      "Other - Recreation": {"2024-2029": 0.00987, "2030-2034": 0.00447957, "2035-2039": 0.003359678, "2040-2049": 0.002239785, "2050+": 0.0}
+      "Other - Restaurant/Bar": {"2024-2029": 0.02381, "2030-2034": 0.008505075, "2035-2039": 0.006378806, "2040-2049": 0.004252537, "2050+": 0.0}
+      "Other - Services": {"2024-2029": 0.01074, "2030-2034": 0.001823381, "2035-2039": 0.001367536, "2040-2049": 0.000911691, "2050+": 0.0}
+      "Other - Specialty Hospital": {"2024-2029": 0.02381, "2030-2034": 0.006321819, "2035-2039": 0.004741365, "2040-2049": 0.00316091, "2050+": 0.0}
+      "Other - Technology/Science": {"2024-2029": 0.02381, "2030-2034": 0.010446456, "2035-2039": 0.007834842, "2040-2049": 0.005223228, "2050+": 0.0}
+      "Outpatient Rehabilitation/Physical Therapy": {"2024-2029": 0.01181, "2030-2034": 0.006018323, "2035-2039": 0.004513742, "2040-2049": 0.003009161, "2050+": 0.0}
+      "Parking": {"2024-2029": 0.00426, "2030-2034": 0.000214421, "2035-2039": 0.000104943, "2040-2049": 0.0, "2050+": 0.0}
+      "Performing Arts": {"2024-2029": 0.00846, "2030-2034": 0.002472539, "2035-2039": 0.001399345, "2040-2049": 0.0, "2050+": 0.0}
+      "Personal Services (Health/Beauty, Dry Cleaning, etc.)": {"2024-2029": 0.00574, "2030-2034": 0.004843037, "2035-2039": 0.003632278, "2040-2049": 0.002421519, "2050+": 0.0}
+      "Pre-school/Daycare": {"2024-2029": 0.00675, "2030-2034": 0.002362874, "2035-2039": 0.001772155, "2040-2049": 0.001181437, "2050+": 0.0}
+      "Refrigerated Warehouse": {"2024-2029": 0.00987, "2030-2034": 0.002852131, "2035-2039": 0.002139098, "2040-2049": 0.001426066, "2050+": 0.0}
+      "Repair Services (Vehicle, Shoe, Locksmith, etc.)": {"2024-2029": 0.00426, "2030-2034": 0.002210699, "2035-2039": 0.001658024, "2040-2049": 0.001105349, "2050+": 0.0}
+      "Residence Hall/Dormitory": {"2024-2029": 0.00758, "2030-2034": 0.002464089, "2035-2039": 0.001332459, "2040-2049": 0.000528616, "2050+": 0.0}
+      "Residential Care Facility": {"2024-2029": 0.01138, "2030-2034": 0.004893124, "2035-2039": 0.004027812, "2040-2049": 0.002272629, "2050+": 0.0}
+      "Restaurant": {"2024-2029": 0.01181, "2030-2034": 0.004038374, "2035-2039": 0.00302878, "2040-2049": 0.002019187, "2050+": 0.0}
+      "Retail Store": {"2024-2029": 0.00758, "2030-2034": 0.00210449, "2035-2039": 0.00121605, "2040-2049": 0.00017604, "2050+": 0.0}
+      "Self-Storage Facility": {"2024-2029": 0.00426, "2030-2034": 0.00061183, "2035-2039": 0.000404901, "2040-2049": 0.000132282, "2050+": 0.0}
+      "Senior Care Community": {"2024-2029": 0.01138, "2030-2034": 0.004410123, "2035-2039": 0.003336443, "2040-2049": 0.002277912, "2050+": 0.0}
+      "Social/Meeting Hall": {"2024-2029": 0.00987, "2030-2034": 0.003833108, "2035-2039": 0.002874831, "2040-2049": 0.001916554, "2050+": 0.0}
+      "Strip Mall": {"2024-2029": 0.01181, "2030-2034": 0.001361842, "2035-2039": 0.000600493, "2040-2049": 3.8512e-05, "2050+": 0.0}
+      "Supermarket/Grocery Store": {"2024-2029": 0.02381, "2030-2034": 0.00675519, "2035-2039": 0.004256103, "2040-2049": 0.002030027, "2050+": 0.0}
+      "Transportation Terminal/Station": {"2024-2029": 0.00426, "2030-2034": 0.000571669, "2035-2039": 0.000428752, "2040-2049": 0.000285834, "2050+": 0.0}
+      "Urgent Care/Clinic/Other Outpatient": {"2024-2029": 0.01181, "2030-2034": 0.005772375, "2035-2039": 0.004329281, "2040-2049": 0.002886187, "2050+": 0.0}
+      "Vocational School": {"2024-2029": 0.00574, "2030-2034": 0.004613122, "2035-2039": 0.003459842, "2040-2049": 0.002306561, "2050+": 0.0}
+      "Wholesale Club/Supercenter": {"2024-2029": 0.01138, "2030-2034": 0.004264962, "2035-2039": 0.003198721, "2040-2049": 0.002132481, "2050+": 0.0}
+      "Worship Facility": {"2024-2029": 0.00574, "2030-2034": 0.001230602, "2035-2039": 0.000866921, "2040-2049": 0.000549306, "2050+": 0.0}
+
+emission_factors:                  # tCO2e per kWh (electricity) or per kBtu
+  electricity:
+    unit: tCO2e/kWh
+    source: dob_emissions_2024
+    section: "Admin Code §28-320.3.1.1 (2024-2029); 1 RCNY §103-14(d)(3)(ii)(a) (2030-2034); DOB table (2035+)"
+    values: {"2024-2029": 0.000288962, "2030-2034": 0.000145, "2035-2039": 0.0000866886, "2040+": 0.0}
+    estimated: ["2035-2039", "2040+"]
+  natural_gas:
+    unit: tCO2e/kBtu
+    source: rcny_103_14
+    section: "Admin Code §28-320.3.1.1; §103-14(d)(3)(ii)(b); DOB table (2035+)"
+    values: {"2024-2034": 0.00005311, "2035+": 0.00005311}
+    estimated: ["2035+"]
+  district_steam:
+    unit: tCO2e/kBtu
+    source: dob_emissions_2024
+    section: "Admin Code §28-320.3.1.1 (2024-2029); §103-14(d)(3)(ii)(c) (2030-2034); DOB table (2035+)"
+    values: {"2024-2029": 0.00004493, "2030-2034": 0.0000432, "2035-2039": 0.0000320, "2040+": 0.0000250}
+    estimated: ["2035-2039", "2040+"]
+  fuel_oil_2:
+    unit: tCO2e/kBtu
+    source: rcny_103_14
+    section: "Admin Code §28-320.3.1.1; §103-14(d)(3)(i)(b)(1); DOB table (2035+)"
+    values: {"2024-2034": 0.00007421, "2035+": 0.00007421}
+    estimated: ["2035+"]
+  fuel_oil_4:
+    unit: tCO2e/kBtu
+    source: rcny_103_14
+    section: "Admin Code §28-320.3.1.1; §103-14(d)(3)(i)(b)(2); DOB table (2035+)"
+    values: {"2024-2034": 0.00007529, "2035+": 0.00007529}
+    estimated: ["2035+"]
+  fuel_oil_1:
+    unit: tCO2e/kBtu
+    source: rcny_103_14
+    section: "§103-14(d)(3)(i)(a), Distillate Fuel Oil No. 1"
+    values: {"2024-2034": 0.00007350}
+  diesel:
+    unit: tCO2e/kBtu
+    source: rcny_103_14
+    section: "§103-14(d)(3)(i)(a)"
+    values: {"2024-2034": 0.00007421}
+  propane:
+    unit: tCO2e/kBtu
+    source: rcny_103_14
+    section: "§103-14(d)(3)(i)(a)"
+    values: {"2024-2034": 0.00006425}
+  kerosene:
+    unit: tCO2e/kBtu
+    source: rcny_103_14
+    section: "§103-14(d)(3)(i)(a)"
+    values: {"2024-2034": 0.00007769}
+  # Fuel oil #5/#6 has no coefficient in the rule: §103-14(d)(3)(i)(c) has the owner propose one. A building that
+  # burns it is flagged, not estimated.
+
+blending:
+  method: gfa_weighted             # B = Σ l_k × s_k over every property type in the building
+  source: rcny_103_14
+  section: "§103-14(d), Equation 103-14.1"
+
+penalty:
+  kind: per_unit_over_limit
+  unit: tCO2e
+  rate: 268
+  source: dob_article_320_guide
+  section: "Admin Code §28-320.6: (emissions - limit) × $268 per tCO2e, per year"
+
+unassignable_types:
+  "Other": "1 RCNY §103-14(c)(2): may not be assigned to any portion of a covered building"
+  "Mixed Use Property": "1 RCNY §103-14(c)(2): may not be assigned to any portion of a covered building"
+  "Energy/Power Station": "Article 320 guide p.75: utilities are not covered under LL97"
+  "Other - Utility": "Article 320 guide p.75: utilities are not covered under LL97"
+  "Wastewater Treatment Plant": "Article 320 guide p.73: left off the table, unlikely to be a covered building"
+  "Drinking Water Treatment & Distribution": "Article 320 guide p.75: utilities are not covered under LL97"
+  "Zoo": "Article 320 guide p.73: left off the table, unlikely to be a covered building"
+  "Single-Family Home": "Article 320 guide p.73: left off the table, unlikely to be a covered building"
+
+notes:
+  - "CY2024-2025: an owner may elect the §28-320.3.1 occupancy-group limit if it is higher (§103-14(c)(3)(ii)). The occupancy group is not in public data, so open-bps uses the ESPM-type limit; for some buildings the true 2024-2025 limit is higher."
+  - "Deductions are not modelled: RECs, offsets (capped at 10% of the limit), beneficial electrification, solar and storage. They lower reported emissions."
+  - "2035+ electricity and steam coefficients are DOB projections, not law, and are flagged Estimated on every output."
+  - "'basis: suggested' maps follow the DOB guide's Suggested Property Type, which a registered design professional may replace with another equivalent type."
+
+property_type_map:                 # ESPM property type -> the rule's limit row
+  "Adult Education": {to: "Adult Education", source: rcny_103_14}
+  "Ambulatory Surgical Center": {to: "Ambulatory Surgical Center", source: rcny_103_14}
+  "Automobile Dealership": {to: "Automobile Dealership", source: rcny_103_14}
+  "Bank Branch": {to: "Bank Branch", source: rcny_103_14}
+  "Bowling Alley": {to: "Bowling Alley", source: rcny_103_14}
+  "College/University": {to: "College/University", source: rcny_103_14}
+  "Convenience Store without Gas Station": {to: "Convenience Store without Gas Station", source: rcny_103_14}
+  "Courthouse": {to: "Courthouse", source: rcny_103_14}
+  "Data Center": {to: "Data Center", source: rcny_103_14}
+  "Distribution Center": {to: "Distribution Center", source: rcny_103_14}
+  "Enclosed Mall": {to: "Enclosed Mall", source: rcny_103_14}
+  "Financial Office": {to: "Financial Office", source: rcny_103_14}
+  "Fitness Center/Health Club/Gym": {to: "Fitness Center/Health Club/Gym", source: rcny_103_14}
+  "Food Sales": {to: "Food Sales", source: rcny_103_14}
+  "Food Service": {to: "Food Service", source: rcny_103_14}
+  "Hospital (General Medical & Surgical)": {to: "Hospital (General Medical & Surgical)", source: rcny_103_14}
+  "Hotel": {to: "Hotel", source: rcny_103_14}
+  "K-12 School": {to: "K-12 School", source: rcny_103_14}
+  "Laboratory": {to: "Laboratory", source: rcny_103_14}
+  "Library": {to: "Library", source: rcny_103_14}
+  "Lifestyle Center": {to: "Lifestyle Center", source: rcny_103_14}
+  "Mailing Center/Post Office": {to: "Mailing Center/Post Office", source: rcny_103_14}
+  "Manufacturing/Industrial Plant": {to: "Manufacturing/Industrial Plant", source: rcny_103_14}
+  "Medical Office": {to: "Medical Office", source: rcny_103_14}
+  "Movie Theater": {to: "Movie Theater", source: rcny_103_14}
+  "Multifamily Housing": {to: "Multifamily Housing", source: rcny_103_14}
+  "Museum": {to: "Museum", source: rcny_103_14}
+  "Non-Refrigerated Warehouse": {to: "Non-Refrigerated Warehouse", source: rcny_103_14}
+  "Office": {to: "Office", source: rcny_103_14}
+  "Other - Education": {to: "Other - Education", source: rcny_103_14}
+  "Other - Entertainment/Public Assembly": {to: "Other - Entertainment/Public Assembly", source: rcny_103_14}
+  "Other - Lodging/Residential": {to: "Other - Lodging/Residential", source: rcny_103_14}
+  "Other - Mall": {to: "Other - Mall", source: rcny_103_14}
+  "Other - Public Services": {to: "Other - Public Services", source: rcny_103_14}
+  "Other - Recreation": {to: "Other - Recreation", source: rcny_103_14}
+  "Other - Restaurant/Bar": {to: "Other - Restaurant/Bar", source: rcny_103_14}
+  "Other - Services": {to: "Other - Services", source: rcny_103_14}
+  "Other - Specialty Hospital": {to: "Other - Specialty Hospital", source: rcny_103_14}
+  "Other - Technology/Science": {to: "Other - Technology/Science", source: rcny_103_14}
+  "Outpatient Rehabilitation/Physical Therapy": {to: "Outpatient Rehabilitation/Physical Therapy", source: rcny_103_14}
+  "Parking": {to: "Parking", source: rcny_103_14}
+  "Performing Arts": {to: "Performing Arts", source: rcny_103_14}
+  "Personal Services (Health/Beauty, Dry Cleaning, etc.)": {to: "Personal Services (Health/Beauty, Dry Cleaning, etc.)", source: rcny_103_14}
+  "Pre-school/Daycare": {to: "Pre-school/Daycare", source: rcny_103_14}
+  "Refrigerated Warehouse": {to: "Refrigerated Warehouse", source: rcny_103_14}
+  "Repair Services (Vehicle, Shoe, Locksmith, etc.)": {to: "Repair Services (Vehicle, Shoe, Locksmith, etc.)", source: rcny_103_14}
+  "Residence Hall/Dormitory": {to: "Residence Hall/Dormitory", source: rcny_103_14}
+  "Residential Care Facility": {to: "Residential Care Facility", source: rcny_103_14}
+  "Restaurant": {to: "Restaurant", source: rcny_103_14}
+  "Retail Store": {to: "Retail Store", source: rcny_103_14}
+  "Self-Storage Facility": {to: "Self-Storage Facility", source: rcny_103_14}
+  "Senior Care Community": {to: "Senior Care Community", source: rcny_103_14}
+  "Social/Meeting Hall": {to: "Social/Meeting Hall", source: rcny_103_14}
+  "Strip Mall": {to: "Strip Mall", source: rcny_103_14}
+  "Supermarket/Grocery Store": {to: "Supermarket/Grocery Store", source: rcny_103_14}
+  "Transportation Terminal/Station": {to: "Transportation Terminal/Station", source: rcny_103_14}
+  "Urgent Care/Clinic/Other Outpatient": {to: "Urgent Care/Clinic/Other Outpatient", source: rcny_103_14}
+  "Vocational School": {to: "Vocational School", source: rcny_103_14}
+  "Wholesale Club/Supercenter": {to: "Wholesale Club/Supercenter", source: rcny_103_14}
+  "Worship Facility": {to: "Worship Facility", source: rcny_103_14}
+  "Vehicle Dealership": {to: "Automobile Dealership", basis: rename, source: dob_article_320_guide, note: "the guide lists 'Automobile [Vehicle] Dealership'"}
+  "Senior Living Community": {to: "Senior Care Community", basis: rename, source: dob_article_320_guide, note: "the guide lists 'Senior Care [Living] Community'"}
+  "Vehicle Repair Services": {to: "Repair Services (Vehicle, Shoe, Locksmith, etc.)", basis: rename, source: dob_article_320_guide, note: "current ESPM name for the rule's 'Repair Services (Vehicle, Shoe, Locksmith, etc.)' (open-bps reading; confirm with an RDP)"}
+  "Community Center and Social Meeting Hall": {to: "Social/Meeting Hall", basis: rename, source: dob_article_320_guide, note: "current ESPM name for the rule's 'Social/Meeting Hall' (open-bps reading; confirm with an RDP)"}
+  "Personal Services (Health/Beauty, Dry Cleaning, etc)": {to: "Personal Services (Health/Beauty, Dry Cleaning, etc.)", basis: rename, source: rcny_103_14, note: "punctuation variant"}
+  "Aquarium": {to: "Museum", basis: suggested, source: dob_article_320_guide}
+  "Bar/Nightclub": {to: "Restaurant", basis: suggested, source: dob_article_320_guide}
+  "Casino": {to: "Social/Meeting Hall", basis: suggested, source: dob_article_320_guide}
+  "Convention Center": {to: "Social/Meeting Hall", basis: suggested, source: dob_article_320_guide}
+  "Ice/Curling Rink": {to: "Fitness Center/Health Club/Gym", basis: suggested, source: dob_article_320_guide}
+  "Indoor Arena": {to: "Fitness Center/Health Club/Gym", basis: suggested, source: dob_article_320_guide}
+  "Race Track": {to: "Fitness Center/Health Club/Gym", basis: suggested, source: dob_article_320_guide}
+  "Roller Rink": {to: "Bowling Alley", basis: suggested, source: dob_article_320_guide}
+  "Stadium (Closed)": {to: "Fitness Center/Health Club/Gym", basis: suggested, source: dob_article_320_guide}
+  "Stadium (Open)": {to: "Fitness Center/Health Club/Gym", basis: suggested, source: dob_article_320_guide}
+  "Swimming Pool": {to: "Fitness Center/Health Club/Gym", basis: suggested, source: dob_article_320_guide}
+  "Heated Swimming Pool": {to: "Fitness Center/Health Club/Gym", basis: suggested, source: dob_article_320_guide}
+  "Fast Food Restaurant": {to: "Restaurant", basis: suggested, source: dob_article_320_guide}
+  "Barracks": {to: "Residence Hall/Dormitory", basis: suggested, source: dob_article_320_guide}
+  "Veterinary Office": {to: "Urgent Care/Clinic/Other Outpatient", basis: suggested, source: dob_article_320_guide}
+  "Fire Station": {to: "Hotel", basis: suggested, source: dob_article_320_guide}
+  "Police Station": {to: "Hotel", basis: suggested, source: dob_article_320_guide}
+  "Prison/Incarceration": {to: "Enclosed Mall", basis: suggested, source: dob_article_320_guide}
+  "Convenience Store with Gas Station": {to: "Convenience Store without Gas Station", basis: suggested, source: dob_article_320_guide}
